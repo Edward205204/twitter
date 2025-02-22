@@ -11,16 +11,16 @@ class Databases {
   private db: Db;
   constructor() {
     this.client = new MongoClient(uri);
-    this.db = this.client.db(process.env.DB_NAME);
-    console.log(this.client);
+    this.db = this.client.db(process.env.DB_NAME as string);
+    this.connect();
   }
-  // hàm connect() sẽ kiểm tra kết nối tới MongoDB
   async connect() {
     try {
+      await this.client.connect();
       await this.db.command({ ping: 1 });
-      console.log('Pinged your deployment. You successfully connected to MongoDB!');
-    } finally {
-      await this.client.close();
+    } catch (error) {
+      console.log('Error ', error);
+      throw error;
     }
   }
 

@@ -1,22 +1,28 @@
 import { Request, Response } from 'express';
 import User from '~/models/schemas/User.schema';
 import databaseService from '~/services/databases.services';
+import usersService from '~/services/users.service';
 
 export const loginController = (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (email === 'nguyentminhkhoa1' && password === '123456') {
-    return res.status(200).json({ message: 'Login success' });
+    res.status(200).json({ message: 'Login success' });
+    return;
   }
 
-  return res.status(400).json({ error: 'Login failed' });
+  res.status(400).json({ error: 'Login failed' });
+  return;
 };
 
 export const registerController = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
-    const result = databaseService.users.insertOne(new User({ email, password }));
-    return res.json({ message: 'Register success' });
+    // const result = databaseService.users.insertOne(new User({ email, password }));
+    const result = usersService.register({ email, password });
+    res.json({ message: 'Register success', result });
+    return;
   } catch (error) {
-    return res.status(400).json({ message: 'Register failed' });
+    res.status(400).json({ message: 'Register failed' });
+    return;
   }
 };

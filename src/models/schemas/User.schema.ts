@@ -10,8 +10,8 @@ interface TypeOfUser {
   _id?: ObjectId;
   name?: string;
   email: string;
-  date_of_birth?: Date;
   password: string;
+  date_of_birth?: Date;
   created_at?: Date;
   updated_at?: Date;
   email_verify_token?: string;

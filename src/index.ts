@@ -1,6 +1,6 @@
 import express from 'express';
-import usersRouter from '~/routes/users.routes';
 import databaseService from '~/services/databases.services';
+import usersRouter from '~/routes/users.routes';
 
 const app = express();
 const PORT = 3000;
