@@ -1,3 +1,5 @@
+// file nay dung de ket noi voi database, va thuc hien cac thao tac voi database
+// khai bao tat ca cac collection o day
 import { Collection, Db, MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import User from '~/models/schemas/User.schema';
