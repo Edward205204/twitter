@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { checkSchema } from 'express-validator';
+import usersService from '~/services/users.services';
 import { validate } from '~/utils/validate';
 
 export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
@@ -11,6 +12,12 @@ export const loginValidator = (req: Request, res: Response, next: NextFunction) 
   next();
 };
 
+/**
+ * -  Đây chỉ là nơi khai báo schema, không phải là nơi tiến hành validate
+ * -  Để tiến hành validate thì cần phải run() nó ở middleware
+ * -  Để lấy được kết quả validate thì cần phải sử dụng method validationResult() của express-validator
+ * -  Hàm validate() bọc schema chính là một hàm return ra một middleware, và middleware này sẽ được sử dụng trong route
+ */
 export const registerValidator = validate(
   checkSchema({
     name: {
@@ -27,7 +34,16 @@ export const registerValidator = validate(
       notEmpty: true,
       isEmail: true,
       errorMessage: 'Email is required',
-      trim: true
+      trim: true,
+      custom: {
+        options: async (value) => {
+          const isEmailExist = await usersService.checkEmailExist(value);
+          if (isEmailExist) {
+            throw new Error('Email already exists');
+          }
+          return true;
+        }
+      }
     },
     password: {
       errorMessage: 'Password is required',
