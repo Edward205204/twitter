@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true, // Cho phép sử dụng decorators trong TypeScript
     "module": "NodeNext", // Quy định output module được sử dụng
     "moduleResolution": "NodeNext",
     "target": "ES2023", // Target output cho code

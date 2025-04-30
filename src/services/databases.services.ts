@@ -26,6 +26,10 @@ class Databases {
     }
   }
 
+  /**
+   * @description Lấy collection users từ database, có thể dùng với insertOne, find, update, delete
+   * @returns {Collection<User>}  Trả về collection users
+   */
   get users(): Collection<User> {
     return this.db.collection(process.env.DB_USER_COLLECTION as string);
   }
