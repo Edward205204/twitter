@@ -2,13 +2,13 @@ import { ObjectId } from 'mongodb';
 
 interface TypeOfUserSalt {
   _id?: ObjectId;
-  user_id: string;
+  user_id: ObjectId;
   salt: string;
 }
 
 export default class UserSalt {
   _id?: ObjectId;
-  user_id: string;
+  user_id: ObjectId;
   salt: string;
 
   constructor(userSalt: TypeOfUserSalt) {
