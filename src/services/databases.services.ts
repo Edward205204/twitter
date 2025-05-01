@@ -1,8 +1,9 @@
 // file nay dung de ket noi voi database, va thuc hien cac thao tac voi database
 // khai bao tat ca cac collection o day
-import { Collection, Db, MongoClient } from 'mongodb';
+import { Collection, Db, MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 import User from '~/models/schemas/User.schema';
+import UserSalt from '~/models/schemas/UserSalt.schema';
 dotenv.config();
 
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xbg5c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -25,6 +26,8 @@ class Databases {
       throw error;
     }
   }
+  // các method get dùng để gọi các collection khác nhau trong cùng 1 database
+  // mỗi collection sẽ có 1 schema riêng nhưng chỉ cần get 1 lần ở đây vì chung db
 
   /**
    * @description Lấy collection users từ database, có thể dùng với insertOne, find, update, delete
@@ -32,6 +35,10 @@ class Databases {
    */
   get users(): Collection<User> {
     return this.db.collection(process.env.DB_USER_COLLECTION as string);
+  }
+
+  get user_salts(): Collection<UserSalt> {
+    return this.db.collection(process.env.DB_USER_SALTS_COLLECTION as string);
   }
 }
 
