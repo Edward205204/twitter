@@ -3,9 +3,12 @@ import usersService from '~/services/users.services';
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core';
 import { RegisterRequest } from '~/models/schemas/requests/User.request';
 import { USER_MESSAGE } from '~/constants/user_message';
+import User from '~/models/schemas/User.schema';
+import { ObjectId } from 'mongodb';
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
-  const { user_id } = req.body;
+  const user = req.user as User;
+  const user_id = user._id as ObjectId;
   const result = await usersService.login(user_id);
   if (!result) {
     return next({ message: USER_MESSAGE.CONFIRM_PASSWORD_IS_REQUIRED });

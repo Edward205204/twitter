@@ -25,7 +25,7 @@ export const loginValidator = validate(
           if (passwordHash.password !== user.password) {
             throw new Error(USER_MESSAGE.EMAIL_OR_PASSWORD_IS_INCORRECT);
           }
-          req.body.user_id = user._id;
+          req.user = user;
           return true;
         }
       },
