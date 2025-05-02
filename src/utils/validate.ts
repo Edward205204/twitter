@@ -1,12 +1,32 @@
-import { Request, Response, NextFunction } from 'express';
+import e, { Request, Response, NextFunction } from 'express';
 import { ValidationChain, validationResult } from 'express-validator';
 import { RunnableValidationChains } from 'express-validator/lib/middlewares/schema';
-
+import { HTTP_STATUS } from '~/constants/http_request';
+import { EntityError, ErrorWithStatus } from '~/models/Errors';
 export const validate = (validations: RunnableValidationChains<ValidationChain>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    await validations.run(req); // run là method của express-validator, nhận req (cần check), tiến hành xác thực nhưng không trả về lỗi(nếu có) ngay lập tức
-    const errors = validationResult(req); // validationResult là method của express-validator, nhận req (đã check) và lúc này nó sẽ trả về kết quả check là một mảng các lỗi (nếu có) đã check ở trên
+    await validations.run(req);
+    const errors = validationResult(req);
     if (errors.isEmpty()) return next();
-    res.status(400).json({ errors: errors.mapped() });
+
+    const errorObject = errors.mapped();
+    const entityError = new EntityError({ errors: {} });
+    for (const key in errorObject) {
+      // msg nếu được throw new Error thì nó có value là string, còn throw từ ErrorWithStatus thì nó có value là ErrorWithStatus và nhảy vào điều kiện if
+      const { msg } = errorObject[key];
+      // Check if the error is an instance of ErrorWithStatus
+      // and if the status is not UNPROCESSABLE_ENTITY - 422
+      if (msg instanceof ErrorWithStatus && msg.status !== HTTP_STATUS.UNPROCESSABLE_ENTITY) {
+        return next(msg);
+      }
+
+      // If the error is entity error, add it to the entityErrors object
+      console.log(errorObject[key]);
+      entityError.errors[key] = {
+        msg
+      };
+    }
+
+    next(new EntityError(entityError));
   };
 };

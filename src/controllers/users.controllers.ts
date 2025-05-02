@@ -14,6 +14,7 @@ export const loginController = (req: Request, res: Response) => {
   return;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterRequest>, res: Response) => {
   const result = await usersService.register(req.body);
   res.json({ message: 'Register success', data: result });
