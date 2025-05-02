@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { checkSchema } from 'express-validator';
+import { USER_MESSAGE } from '~/constants/user_message';
 import usersService from '~/services/users.services';
 import { validate } from '~/utils/validate';
 
@@ -21,51 +22,59 @@ export const loginValidator = (req: Request, res: Response, next: NextFunction) 
 export const registerValidator = validate(
   checkSchema({
     name: {
-      notEmpty: true,
-      errorMessage: 'Name is required',
-      isString: true,
-      trim: true,
+      notEmpty: { errorMessage: USER_MESSAGE.NAME_IS_REQUIRED },
+      isString: { errorMessage: USER_MESSAGE.NAME_MUST_BE_A_STRING },
       isLength: {
         options: { min: 1, max: 100 },
-        errorMessage: 'Name must be between 1 and 100 characters'
-      }
+        errorMessage: USER_MESSAGE.NAME_LENGTH_MUST_BE_FROM_1_TO_100
+      },
+      trim: true
     },
     email: {
-      notEmpty: true,
-      isEmail: true,
-      errorMessage: 'Email is required',
-      trim: true,
+      notEmpty: {
+        errorMessage: USER_MESSAGE.EMAIL_IS_REQUIRED
+      },
+      isEmail: {
+        errorMessage: USER_MESSAGE.EMAIL_IS_INVALID
+      },
       custom: {
         options: async (value) => {
           const isEmailExist = await usersService.checkEmailExist(value);
           if (isEmailExist) {
-            throw new Error('Email already exists');
+            throw new Error(USER_MESSAGE.EMAIL_ALREADY_EXISTS);
           }
           return true;
         }
-      }
+      },
+      trim: true
     },
     password: {
-      errorMessage: 'Password is required',
-      notEmpty: true,
-      isString: true,
+      notEmpty: {
+        errorMessage: USER_MESSAGE.PASSWORD_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_A_STRING
+      },
       isStrongPassword: {
         options: { minLength: 6, minUppercase: 1, minLowercase: 1, minNumbers: 1, minSymbols: 1 },
-        errorMessage: 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+        errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_STRONG
       }
     },
     confirm_password: {
-      errorMessage: 'Confirm password is required',
-      notEmpty: true,
-      isString: true,
+      notEmpty: {
+        errorMessage: USER_MESSAGE.CONFIRM_PASSWORD_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGE.CONFIRM_PASSWORD_MUST_BE_A_STRING
+      },
       isStrongPassword: {
         options: { minLength: 6, minUppercase: 1, minLowercase: 1, minNumbers: 1, minSymbols: 1 },
-        errorMessage: 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+        errorMessage: USER_MESSAGE.CONFIRM_PASSWORD_MUST_BE_STRONG
       },
       custom: {
         options: (value, { req }) => {
           if (value !== req.body.password) {
-            throw new Error('Passwords do not match');
+            throw new Error(USER_MESSAGE.CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD);
           }
           return true;
         }
@@ -73,7 +82,8 @@ export const registerValidator = validate(
     },
     date_of_birth: {
       isISO8601: {
-        options: { strict: true, strictSeparator: true }
+        options: { strict: true, strictSeparator: true },
+        errorMessage: USER_MESSAGE.DATE_OF_BIRTH_MUST_BE_ISO8601
       }
     }
   })
