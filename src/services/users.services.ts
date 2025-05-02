@@ -1,11 +1,13 @@
 import User from '~/models/schemas/User.schema';
 import databaseService from './databases.services';
 import { RegisterRequest } from '~/models/schemas/requests/User.request';
+import dotenv from 'dotenv';
 import { hashPassword } from '~/utils/crypto';
-import UserSalt from '~/models/schemas/UserSalt.schema';
 import { signToken } from '~/utils/jwt';
 import { TokenType } from '~/constants/token_type';
-
+import { ObjectId } from 'mongodb';
+import RefreshToken from '~/models/schemas/RefreshToken';
+dotenv.config();
 class users {
   /**
    * @param user_id
@@ -41,14 +43,23 @@ class users {
     });
   }
 
+  private async sightToken(user_id: string): Promise<string[]> {
+    const [access_token, refresh_token] = await Promise.all([
+      this.accessToken(user_id.toString()),
+      this.refreshToken(user_id.toString())
+    ]);
+    return [access_token, refresh_token];
+  }
+
   async register(value: RegisterRequest) {
-    const { password, salt } = await hashPassword(value.password);
+    const { password, salt } = await hashPassword({ password: value.password });
 
     const result = await databaseService.users.insertOne(
       new User({
         ...value,
         date_of_birth: new Date(value.date_of_birth),
-        password: password
+        password: password,
+        salt
       })
     );
 
@@ -57,19 +68,20 @@ class users {
     }
 
     const user_id = result.insertedId;
-    const [access_token, refresh_token] = await Promise.all([
-      this.accessToken(user_id.toString()),
-      this.refreshToken(user_id.toString())
-    ]);
+    const [access_token, refresh_token] = await this.sightToken(user_id.toString());
 
-    await databaseService.user_salts.insertOne(new UserSalt({ user_id: user_id, salt }));
+    return { access_token, refresh_token };
+  }
 
+  async login(user_id: ObjectId) {
+    const [access_token, refresh_token] = await this.sightToken(user_id.toString());
+    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token }));
     return { access_token, refresh_token };
   }
 
   async checkEmailExist(email: string) {
     const user = await databaseService.users.findOne({ email });
-    return Boolean(user);
+    return user;
   }
 }
 

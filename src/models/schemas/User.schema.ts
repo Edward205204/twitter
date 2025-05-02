@@ -18,6 +18,7 @@ interface TypeOfUser {
   username?: string;
   avatar?: string;
   cover_photo?: string;
+  salt: string;
 }
 
 export default class User {
@@ -31,7 +32,7 @@ export default class User {
   email_verify_token?: string;
   forgot_password_token?: string;
   verify?: UserVerifyStatus;
-
+  salt: string;
   bio?: string;
   location?: string;
   website?: string;
@@ -40,6 +41,7 @@ export default class User {
   cover_photo?: string;
   constructor(user: TypeOfUser) {
     this._id = user._id;
+    this.salt = user.salt;
     this.name = user.name || '';
     this.email = user.email;
     this.password = user.password;

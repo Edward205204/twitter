@@ -1,12 +1,5 @@
-// import { createHash } from 'crypto';
-
-// export function sha256(content: string) {
-//   return createHash('sha256').update(content).digest('hex');
-// }
-
-// export function hashPassword(password: string) {
-//   return sha256(password + (process.env.PRIVATE_KEY as string));
-// }
+import dotenv from 'dotenv';
+dotenv.config();
 
 import { createHash, randomBytes } from 'crypto';
 
@@ -21,9 +14,14 @@ export function sha256(content: string): Promise<string> {
   });
 }
 
-export async function hashPassword(password: string): Promise<{ password: string; salt: string }> {
+export async function hashPassword({
+  password,
+  salt = randomBytes(16).toString('hex')
+}: {
+  password: string;
+  salt?: string;
+}): Promise<{ password: string; salt: string }> {
   try {
-    const salt = randomBytes(16).toString('hex');
     const hash = await sha256(password + (process.env.PRIVATE_KEY as string) + salt);
     return { password: hash, salt };
   } catch (error) {

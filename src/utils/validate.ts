@@ -21,7 +21,6 @@ export const validate = (validations: RunnableValidationChains<ValidationChain>)
       }
 
       // If the error is entity error, add it to the entityErrors object
-      console.log(errorObject[key]);
       entityError.errors[key] = {
         ...errorObject[key],
         msg

@@ -1,4 +1,6 @@
 export const USER_MESSAGE = {
+  REGISTER_SUCCESS: 'Register success',
+  LOGIN_SUCCESS: 'Login success',
   VALIDATION_ERROR: 'Validation error',
   NAME_IS_REQUIRED: 'Name is required',
   NAME_MUST_BE_A_STRING: 'Name must be a string',
@@ -17,5 +19,7 @@ export const USER_MESSAGE = {
   CONFIRM_PASSWORD_MUST_BE_STRONG:
     'Confirm password must be 6-50 characters long and contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol',
   CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD: 'Confirm password must be the same as password',
-  DATE_OF_BIRTH_MUST_BE_ISO8601: 'Date of birth must be ISO8601'
+  DATE_OF_BIRTH_MUST_BE_ISO8601: 'Date of birth must be ISO8601',
+  SALTS_NOT_FOUND: 'Salts not found',
+  EMAIL_OR_PASSWORD_IS_INCORRECT: 'Email or password is incorrect'
 } as const;

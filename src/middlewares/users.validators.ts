@@ -1,17 +1,50 @@
 import { NextFunction, Request, Response } from 'express';
 import { checkSchema } from 'express-validator';
 import { USER_MESSAGE } from '~/constants/user_message';
+import databaseService from '~/services/databases.services';
 import usersService from '~/services/users.services';
+import { hashPassword } from '~/utils/crypto';
 import { validate } from '~/utils/validate';
 
-export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(400).json({ error: 'Email or password is required' });
-    return;
-  }
-  next();
-};
+export const loginValidator = validate(
+  checkSchema({
+    email: {
+      notEmpty: {
+        errorMessage: USER_MESSAGE.EMAIL_IS_REQUIRED
+      },
+      isEmail: {
+        errorMessage: USER_MESSAGE.EMAIL_IS_INVALID
+      },
+      custom: {
+        options: async (value, { req }) => {
+          const user = await usersService.checkEmailExist(value);
+          if (!user) {
+            throw new Error(USER_MESSAGE.EMAIL_OR_PASSWORD_IS_INCORRECT);
+          }
+          const passwordHash = await hashPassword({ password: req.body.password, salt: user.salt });
+          if (passwordHash.password !== user.password) {
+            throw new Error(USER_MESSAGE.EMAIL_OR_PASSWORD_IS_INCORRECT);
+          }
+          req.body.user_id = user._id;
+          return true;
+        }
+      },
+      trim: true
+    },
+    password: {
+      notEmpty: {
+        errorMessage: USER_MESSAGE.PASSWORD_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_A_STRING
+      },
+      isStrongPassword: {
+        options: { minLength: 6, minUppercase: 1, minLowercase: 1, minNumbers: 1, minSymbols: 1 },
+        errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_STRONG
+      }
+    }
+  })
+);
 
 /**
  * -  Đây chỉ là nơi khai báo schema, không phải là nơi tiến hành validate
