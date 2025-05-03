@@ -83,6 +83,15 @@ class users {
     const user = await databaseService.users.findOne({ email });
     return user;
   }
+
+  async logout(refresh_token: string) {
+    await databaseService.refresh_tokens.deleteOne({ refresh_token });
+    // Khong cần thiết check result ở đây vì đã xử lý ở middleware rồi
+    // if (!result.acknowledged) {
+    //   throw new Error('Failed to delete refresh token from database');
+    // }
+    return { message: 'Logout successfully' };
+  }
 }
 
 const usersService = new users();

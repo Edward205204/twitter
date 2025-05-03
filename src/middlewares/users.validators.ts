@@ -1,6 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
 import { checkSchema } from 'express-validator';
-import { access } from 'fs';
+import { JsonWebTokenError } from 'jsonwebtoken';
 import { HTTP_STATUS } from '~/constants/http_request';
 import { USER_MESSAGE } from '~/constants/user_message';
 import { ErrorWithStatus } from '~/models/Errors';
@@ -8,6 +7,9 @@ import usersService from '~/services/users.services';
 import { hashPassword } from '~/utils/crypto';
 import { verifyToken } from '~/utils/jwt';
 import { validate } from '~/utils/validate';
+import capitalize from 'lodash/capitalize';
+import databaseService from '~/services/databases.services';
+import { Request } from 'express-validator/lib/base';
 
 export const loginValidator = validate(
   checkSchema(
@@ -145,11 +147,11 @@ export const accessTokenValidator = validate(
             }
             value = value.split(' ')[1];
             try {
-              const accessTokenDecoded = await verifyToken({ token: value });
-              req.access_token_decoded = accessTokenDecoded;
+              const decoded_authorization = await verifyToken({ token: value });
+              (req as Request).decoded_authorization = decoded_authorization;
             } catch (error) {
               throw new ErrorWithStatus({
-                message: USER_MESSAGE.ACCESS_TOKEN_IS_INVALID,
+                message: capitalize((error as JsonWebTokenError).message),
                 status: HTTP_STATUS.UNAUTHORIZED
               });
             }
@@ -159,5 +161,54 @@ export const accessTokenValidator = validate(
       }
     },
     ['headers']
+  )
+);
+
+export const refreshTokenValidate = validate(
+  checkSchema(
+    {
+      refresh_token: {
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGE.ACCESS_TOKEN_IS_REQUIRED,
+                status: HTTP_STATUS.UNAUTHORIZED
+              });
+              // Không gửi refresh token khi logout
+            }
+
+            try {
+              const [decoded_refresh_token, refreshToken] = await Promise.all([
+                verifyToken({ token: value }),
+                databaseService.refresh_tokens.findOne({ refresh_token: value })
+              ]);
+
+              // không cần thiết check decoded refresh token vì nó đã xử lý ở catch rồi
+
+              if (!refreshToken)
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGE.REFRESH_TOKEN_OR_NOT_EXIST,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                });
+              (req as Request).decoded_refresh_token = decoded_refresh_token;
+            } catch (error) {
+              // Nếu lúc giải mã token mà bị lỗi thì sẽ ném ra lỗi này
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: capitalize(error.message),
+                  status: HTTP_STATUS.UNAUTHORIZED
+                });
+              }
+
+              // Còn lỗi từ throw từ try sẽ được ném ra ở đây
+              throw error;
+            }
+            return true;
+          }
+        }
+      }
+    },
+    ['body']
   )
 );

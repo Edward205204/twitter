@@ -23,3 +23,10 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
   res.json({ message: USER_MESSAGE.REGISTER_SUCCESS, data: result });
   return;
 };
+
+export const logoutController = async (req: Request, res: Response) => {
+  const { refresh_token } = req.body;
+  const result = await usersService.logout(refresh_token);
+  res.json(result);
+  return;
+};
