@@ -1,5 +1,5 @@
 import { HTTP_STATUS } from '~/constants/http_request';
-import { USER_MESSAGE } from '~/constants/user_message';
+import { USER_MESSAGE } from '~/constants/user.message';
 
 type ErrorWithStatusInterface = Record<
   string,
@@ -22,7 +22,7 @@ export class ErrorWithStatus {
 export class EntityError extends ErrorWithStatus {
   errors: ErrorWithStatusInterface;
   constructor({
-    message = USER_MESSAGE.VALIDATION_ERROR,
+    message = USER_MESSAGE.VALIDATION.VALIDATION_ERROR,
     errors
   }: {
     message?: string;

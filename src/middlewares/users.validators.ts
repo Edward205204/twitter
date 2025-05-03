@@ -1,7 +1,7 @@
 import { checkSchema } from 'express-validator';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import { HTTP_STATUS } from '~/constants/http_request';
-import { USER_MESSAGE } from '~/constants/user_message';
+import { USER_MESSAGE } from '~/constants/user.message';
 import { ErrorWithStatus } from '~/models/Errors';
 import usersService from '~/services/users.services';
 import { hashPassword } from '~/utils/crypto';
@@ -16,20 +16,20 @@ export const loginValidator = validate(
     {
       email: {
         notEmpty: {
-          errorMessage: USER_MESSAGE.EMAIL_IS_REQUIRED
+          errorMessage: USER_MESSAGE.VALIDATION.EMAIL_IS_REQUIRED
         },
         isEmail: {
-          errorMessage: USER_MESSAGE.EMAIL_IS_INVALID
+          errorMessage: USER_MESSAGE.VALIDATION.EMAIL_IS_INVALID
         },
         custom: {
           options: async (value, { req }) => {
             const user = await usersService.checkEmailExist(value);
             if (!user) {
-              throw new Error(USER_MESSAGE.EMAIL_OR_PASSWORD_IS_INCORRECT);
+              throw new Error(USER_MESSAGE.AUTH.EMAIL_OR_PASSWORD_IS_INCORRECT);
             }
             const passwordHash = await hashPassword({ password: req.body.password, salt: user.salt });
             if (passwordHash.password !== user.password) {
-              throw new Error(USER_MESSAGE.EMAIL_OR_PASSWORD_IS_INCORRECT);
+              throw new Error(USER_MESSAGE.AUTH.EMAIL_OR_PASSWORD_IS_INCORRECT);
             }
             req.user = user;
             return true;
@@ -39,14 +39,14 @@ export const loginValidator = validate(
       },
       password: {
         notEmpty: {
-          errorMessage: USER_MESSAGE.PASSWORD_IS_REQUIRED
+          errorMessage: USER_MESSAGE.VALIDATION.PASSWORD_IS_REQUIRED
         },
         isString: {
-          errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_A_STRING
+          errorMessage: USER_MESSAGE.VALIDATION.PASSWORD_MUST_BE_A_STRING
         },
         isStrongPassword: {
           options: { minLength: 6, minUppercase: 1, minLowercase: 1, minNumbers: 1, minSymbols: 1 },
-          errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_STRONG
+          errorMessage: USER_MESSAGE.VALIDATION.PASSWORD_MUST_BE_STRONG
         }
       }
     },
@@ -64,26 +64,26 @@ export const registerValidator = validate(
   checkSchema(
     {
       name: {
-        notEmpty: { errorMessage: USER_MESSAGE.NAME_IS_REQUIRED },
-        isString: { errorMessage: USER_MESSAGE.NAME_MUST_BE_A_STRING },
+        notEmpty: { errorMessage: USER_MESSAGE.VALIDATION.NAME_IS_REQUIRED },
+        isString: { errorMessage: USER_MESSAGE.VALIDATION.NAME_MUST_BE_A_STRING },
         isLength: {
           options: { min: 1, max: 100 },
-          errorMessage: USER_MESSAGE.NAME_LENGTH_MUST_BE_FROM_1_TO_100
+          errorMessage: USER_MESSAGE.VALIDATION.NAME_LENGTH_MUST_BE_FROM_1_TO_100
         },
         trim: true
       },
       email: {
         notEmpty: {
-          errorMessage: USER_MESSAGE.EMAIL_IS_REQUIRED
+          errorMessage: USER_MESSAGE.VALIDATION.EMAIL_IS_REQUIRED
         },
         isEmail: {
-          errorMessage: USER_MESSAGE.EMAIL_IS_INVALID
+          errorMessage: USER_MESSAGE.VALIDATION.EMAIL_IS_INVALID
         },
         custom: {
           options: async (value) => {
             const isEmailExist = await usersService.checkEmailExist(value);
             if (isEmailExist) {
-              throw new Error(USER_MESSAGE.EMAIL_ALREADY_EXISTS);
+              throw new Error(USER_MESSAGE.VALIDATION.EMAIL_ALREADY_EXISTS);
             }
             return true;
           }
@@ -92,31 +92,31 @@ export const registerValidator = validate(
       },
       password: {
         notEmpty: {
-          errorMessage: USER_MESSAGE.PASSWORD_IS_REQUIRED
+          errorMessage: USER_MESSAGE.VALIDATION.PASSWORD_IS_REQUIRED
         },
         isString: {
-          errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_A_STRING
+          errorMessage: USER_MESSAGE.VALIDATION.PASSWORD_MUST_BE_A_STRING
         },
         isStrongPassword: {
           options: { minLength: 6, minUppercase: 1, minLowercase: 1, minNumbers: 1, minSymbols: 1 },
-          errorMessage: USER_MESSAGE.PASSWORD_MUST_BE_STRONG
+          errorMessage: USER_MESSAGE.VALIDATION.PASSWORD_MUST_BE_STRONG
         }
       },
       confirm_password: {
         notEmpty: {
-          errorMessage: USER_MESSAGE.CONFIRM_PASSWORD_IS_REQUIRED
+          errorMessage: USER_MESSAGE.VALIDATION.CONFIRM_PASSWORD_IS_REQUIRED
         },
         isString: {
-          errorMessage: USER_MESSAGE.CONFIRM_PASSWORD_MUST_BE_A_STRING
+          errorMessage: USER_MESSAGE.VALIDATION.CONFIRM_PASSWORD_MUST_BE_A_STRING
         },
         isStrongPassword: {
           options: { minLength: 6, minUppercase: 1, minLowercase: 1, minNumbers: 1, minSymbols: 1 },
-          errorMessage: USER_MESSAGE.CONFIRM_PASSWORD_MUST_BE_STRONG
+          errorMessage: USER_MESSAGE.VALIDATION.CONFIRM_PASSWORD_MUST_BE_STRONG
         },
         custom: {
           options: (value, { req }) => {
             if (value !== req.body.password) {
-              throw new Error(USER_MESSAGE.CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD);
+              throw new Error(USER_MESSAGE.VALIDATION.CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD);
             }
             return true;
           }
@@ -125,7 +125,7 @@ export const registerValidator = validate(
       date_of_birth: {
         isISO8601: {
           options: { strict: true, strictSeparator: true },
-          errorMessage: USER_MESSAGE.DATE_OF_BIRTH_MUST_BE_ISO8601
+          errorMessage: USER_MESSAGE.VALIDATION.DATE_OF_BIRTH_MUST_BE_ISO8601
         }
       }
     },
@@ -141,7 +141,7 @@ export const accessTokenValidator = validate(
           options: async (value: string, { req }) => {
             if (!value) {
               throw new ErrorWithStatus({
-                message: USER_MESSAGE.ACCESS_TOKEN_IS_REQUIRED,
+                message: USER_MESSAGE.TOKEN.ACCESS_TOKEN_IS_REQUIRED,
                 status: HTTP_STATUS.UNAUTHORIZED
               });
             }
@@ -172,7 +172,7 @@ export const refreshTokenValidate = validate(
           options: async (value: string, { req }) => {
             if (!value) {
               throw new ErrorWithStatus({
-                message: USER_MESSAGE.ACCESS_TOKEN_IS_REQUIRED,
+                message: USER_MESSAGE.TOKEN.ACCESS_TOKEN_IS_REQUIRED,
                 status: HTTP_STATUS.UNAUTHORIZED
               });
               // Không gửi refresh token khi logout
@@ -188,7 +188,7 @@ export const refreshTokenValidate = validate(
 
               if (!refreshToken)
                 throw new ErrorWithStatus({
-                  message: USER_MESSAGE.REFRESH_TOKEN_OR_NOT_EXIST,
+                  message: USER_MESSAGE.TOKEN.REFRESH_TOKEN_OR_NOT_EXIST,
                   status: HTTP_STATUS.UNAUTHORIZED
                 });
               (req as Request).decoded_refresh_token = decoded_refresh_token;

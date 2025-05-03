@@ -7,6 +7,7 @@ import { signToken } from '~/utils/jwt';
 import { TokenType } from '~/constants/token_type';
 import { ObjectId } from 'mongodb';
 import RefreshToken from '~/models/schemas/RefreshToken';
+import { USER_MESSAGE } from '~/constants/user.message';
 dotenv.config();
 class users {
   /**
@@ -64,7 +65,7 @@ class users {
     );
 
     if (!result.acknowledged) {
-      throw new Error('Failed to insert user into database');
+      throw new Error(USER_MESSAGE.ERROR.FAIL_TO_INSERT_USER);
     }
 
     const user_id = result.insertedId;
@@ -90,7 +91,7 @@ class users {
     // if (!result.acknowledged) {
     //   throw new Error('Failed to delete refresh token from database');
     // }
-    return { message: 'Logout successfully' };
+    return { message: USER_MESSAGE.AUTH.LOGOUT_SUCCESS };
   }
 }
 
