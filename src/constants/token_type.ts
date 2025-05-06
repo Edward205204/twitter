@@ -1,7 +1,6 @@
 export enum TokenType {
-  AccessToken,
-  RefreshToken,
-  EmailVerificationToken,
-  ForgotPasswordToken
+  AccessToken = 0,
+  RefreshToken = 1,
+  EmailVerificationToken = 2,
+  ForgotPasswordToken = 3
 }
-// Không được chỉnh sửa enum này

@@ -6,7 +6,8 @@ import { ErrorWithStatus } from '~/models/Errors';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const defaultErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof ErrorWithStatus) {
-    return res.status(err.status).json(omit(err, ['status']));
+    res.status(err.status).json(omit(err, ['status']));
+    return;
   }
   Object.getOwnPropertyNames(err).forEach((key) => {
     Object.defineProperty(err, key, {

@@ -1,6 +1,8 @@
 import { JwtPayload } from 'jsonwebtoken';
 import { TokenType } from '~/constants/token_type';
 
+// dùng để làm generic cho các request
+
 export interface RegisterRequest {
   name: string;
   email: string;

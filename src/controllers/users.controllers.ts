@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import usersService from '~/services/users.services';
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core';
-import { RegisterRequest } from '~/models/schemas/requests/User.request';
+import { LogoutReqBody, RegisterRequest } from '~/models/schemas/requests/User.request';
 import { USER_MESSAGE } from '~/constants/user.message';
 import User from '~/models/schemas/User.schema';
 import { ObjectId } from 'mongodb';
@@ -24,7 +24,7 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
   return;
 };
 
-export const logoutController = async (req: Request, res: Response) => {
+export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.body;
   const result = await usersService.logout(refresh_token);
   res.json(result);

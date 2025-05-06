@@ -1,7 +1,6 @@
+import { createHash, randomBytes } from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
-
-import { createHash, randomBytes } from 'crypto';
 
 export function sha256(content: string): Promise<string> {
   return new Promise((resolve, reject) => {
