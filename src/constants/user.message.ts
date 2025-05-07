@@ -40,7 +40,8 @@ export const USER_MESSAGE = {
     REFRESH_TOKEN_IS_INVALID: 'Refresh token is invalid',
     REFRESH_TOKEN_OR_NOT_EXIST: 'Used refresh token or not exist',
     EMAIL_IS_VERIFIED_BEFORE: 'Email is verified before',
-    EMAIL_VERIFY_TOKEN_IS_NOT_EXIST_OR_NOT_MATCH: 'Token is not exist or not match'
+    EMAIL_VERIFY_TOKEN_IS_NOT_EXIST_OR_NOT_MATCH: 'Token is not exist or not match',
+    EMAIL_VERIFY_TOKEN_IS_RESENT: 'Email verify token is resent'
   },
 
   // Errors

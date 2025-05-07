@@ -9,7 +9,6 @@ import { ObjectId } from 'mongodb';
 import RefreshToken from '~/models/schemas/RefreshToken';
 import { USER_MESSAGE } from '~/constants/user.message';
 import { UserVerifyStatus } from '~/constants/enums';
-import { ErrorWithStatus } from '~/models/Errors';
 dotenv.config();
 class users {
   /**
@@ -112,6 +111,10 @@ class users {
   }
 
   async verifyEmail(user_id: string) {
+    // Khi thực hiện update_at thì có hai thời điểm
+    // 1. Thời điểm tạo giá trị, 2. Thời điểm cập nhật giá trị
+    // Dùng currentDate để cập nhật (thời điểm cập nhật giá trị)
+    // Hoặc dùng "$$NOW" để cập nhật (thời điểm tạo giá trị)
     const [[access_token, refresh_token]] = await Promise.all([
       this.sightAccessTokenAndRefreshToken(user_id.toString()),
       databaseService.users.updateOne(
@@ -119,8 +122,11 @@ class users {
         {
           $set: {
             email_verify_token: '',
-            verify: UserVerifyStatus.Verified,
-            updated_at: new Date()
+            verify: UserVerifyStatus.Verified
+            // updated_at: new Date()
+          },
+          $currentDate: {
+            updated_at: true
           }
         }
       )
@@ -128,6 +134,15 @@ class users {
     await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id: new ObjectId(user_id), refresh_token }));
 
     return { access_token, refresh_token };
+  }
+
+  async resendVerifyEmail(user_id: string) {
+    const email_verify_token = await this.emailVerifyToken(user_id);
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      { $set: { email_verify_token }, $currentDate: { updated_at: true } }
+    );
+    return { email_verify_token };
   }
 }
 

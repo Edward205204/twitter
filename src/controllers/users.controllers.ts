@@ -60,3 +60,24 @@ export const verifyEmailTokenController = async (req: Request, res: Response) =>
   });
   return;
 };
+
+export const resendVerifyEmailController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) });
+  if (!user) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGE.ERROR.USER_NOT_FOUND
+    });
+    return;
+  }
+  if (user.verify === UserVerifyStatus.Verified) {
+    res.json({
+      message: USER_MESSAGE.TOKEN.EMAIL_IS_VERIFIED_BEFORE
+    });
+    return;
+  }
+
+  const result = await usersService.resendVerifyEmail(user_id);
+  res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGE.TOKEN.EMAIL_VERIFY_TOKEN_IS_RESENT, result });
+  return;
+};
