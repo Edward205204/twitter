@@ -8,6 +8,8 @@ import { TokenType } from '~/constants/token_type';
 import { ObjectId } from 'mongodb';
 import RefreshToken from '~/models/schemas/RefreshToken';
 import { USER_MESSAGE } from '~/constants/user.message';
+import { UserVerifyStatus } from '~/constants/enums';
+import { ErrorWithStatus } from '~/models/Errors';
 dotenv.config();
 class users {
   /**
@@ -31,8 +33,8 @@ class users {
   private async emailVerifyToken(user_id: string): Promise<string> {
     return await signToken({
       secretOrPrivateKey: process.env.JWT_SECRET_KEY_EMAIL_VERIFY_TOKEN as string,
-      payload: { user_id, token_type: TokenType.AccessToken },
-      option: { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME }
+      payload: { user_id, token_type: TokenType.EmailVerificationToken },
+      option: { expiresIn: process.env.EMAIL_VERIFY_TOKEN_EXPIRATION_TIME as string }
     });
   }
 
@@ -54,7 +56,7 @@ class users {
     });
   }
 
-  private async sightToken(user_id: string): Promise<string[]> {
+  private async sightAccessTokenAndRefreshToken(user_id: string): Promise<string[]> {
     const [access_token, refresh_token] = await Promise.all([
       this.accessToken(user_id.toString()),
       this.refreshToken(user_id.toString())
@@ -84,13 +86,13 @@ class users {
       throw new Error(USER_MESSAGE.ERROR.FAIL_TO_INSERT_USER);
     }
 
-    const [access_token, refresh_token] = await this.sightToken(user_id.toString());
+    const [access_token, refresh_token] = await this.sightAccessTokenAndRefreshToken(user_id.toString());
 
     return { access_token, refresh_token };
   }
 
   async login(user_id: ObjectId) {
-    const [access_token, refresh_token] = await this.sightToken(user_id.toString());
+    const [access_token, refresh_token] = await this.sightAccessTokenAndRefreshToken(user_id.toString());
     await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token }));
     return { access_token, refresh_token };
   }
@@ -107,6 +109,25 @@ class users {
     //   throw new Error('Failed to delete refresh token from database');
     // }
     return { message: USER_MESSAGE.AUTH.LOGOUT_SUCCESS };
+  }
+
+  async verifyEmail(user_id: string) {
+    const [[access_token, refresh_token]] = await Promise.all([
+      this.sightAccessTokenAndRefreshToken(user_id.toString()),
+      databaseService.users.updateOne(
+        { _id: new ObjectId(user_id) },
+        {
+          $set: {
+            email_verify_token: '',
+            verify: UserVerifyStatus.Verified,
+            updated_at: new Date()
+          }
+        }
+      )
+    ]);
+    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id: new ObjectId(user_id), refresh_token }));
+
+    return { access_token, refresh_token };
   }
 }
 

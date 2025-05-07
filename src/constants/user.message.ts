@@ -4,12 +4,14 @@ export const USER_MESSAGE = {
     LOGIN_SUCCESS: 'Login success',
     REGISTER_SUCCESS: 'Register success',
     LOGOUT_SUCCESS: 'Logout success',
-    EMAIL_OR_PASSWORD_IS_INCORRECT: 'Email or password is incorrect'
+    EMAIL_OR_PASSWORD_IS_INCORRECT: 'Email or password is incorrect',
+    VERIFY_EMAIL_SUCCESS: 'Verify email success'
   },
 
   // Validation messages
   VALIDATION: {
     NAME_IS_REQUIRED: 'Name is required',
+    EMAIL_VERIFY_TOKEN_IS_REQUIRED: 'Email verify token is required',
     NAME_MUST_BE_A_STRING: 'Name must be a string',
     NAME_LENGTH_MUST_BE_FROM_1_TO_100: 'Name length must be from 1 to 100',
     EMAIL_IS_REQUIRED: 'Email is required',
@@ -36,12 +38,15 @@ export const USER_MESSAGE = {
     ACCESS_TOKEN_IS_INVALID: 'Access token is invalid',
     REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',
     REFRESH_TOKEN_IS_INVALID: 'Refresh token is invalid',
-    REFRESH_TOKEN_OR_NOT_EXIST: 'Used refresh token or not exist'
+    REFRESH_TOKEN_OR_NOT_EXIST: 'Used refresh token or not exist',
+    EMAIL_IS_VERIFIED_BEFORE: 'Email is verified before',
+    EMAIL_VERIFY_TOKEN_IS_NOT_EXIST_OR_NOT_MATCH: 'Token is not exist or not match'
   },
 
   // Errors
   ERROR: {
     SALTS_NOT_FOUND: 'Salts not found',
-    FAIL_TO_INSERT_USER: 'Failed to insert user into database'
+    FAIL_TO_INSERT_USER: 'Failed to insert user into database',
+    USER_NOT_FOUND: 'User not found'
   }
 } as const;
