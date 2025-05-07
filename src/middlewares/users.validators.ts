@@ -147,7 +147,10 @@ export const accessTokenValidator = validate(
             }
             value = value.split(' ')[1];
             try {
-              const decoded_authorization = await verifyToken({ token: value });
+              const decoded_authorization = await verifyToken({
+                token: value,
+                secretOrPublicKey: process.env.JWT_SECRET_KEY_ACCESS_TOKEN as string
+              });
               (req as Request).decoded_authorization = decoded_authorization;
             } catch (error) {
               throw new ErrorWithStatus({
@@ -180,7 +183,7 @@ export const refreshTokenValidate = validate(
 
             try {
               const [decoded_refresh_token, refreshToken] = await Promise.all([
-                verifyToken({ token: value }),
+                verifyToken({ token: value, secretOrPublicKey: process.env.JWT_SECRET_KEY_REFRESH_TOKEN as string }),
                 databaseService.refresh_tokens.findOne({ refresh_token: value })
               ]);
 

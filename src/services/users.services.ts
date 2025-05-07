@@ -22,6 +22,15 @@ class users {
    */
   private async accessToken(user_id: string): Promise<string> {
     return await signToken({
+      secretOrPrivateKey: process.env.JWT_SECRET_KEY_ACCESS_TOKEN as string,
+      payload: { user_id, token_type: TokenType.AccessToken },
+      option: { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME }
+    });
+  }
+
+  private async emailVerifyToken(user_id: string): Promise<string> {
+    return await signToken({
+      secretOrPrivateKey: process.env.JWT_SECRET_KEY_EMAIL_VERIFY_TOKEN as string,
       payload: { user_id, token_type: TokenType.AccessToken },
       option: { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME }
     });
@@ -39,6 +48,7 @@ class users {
    */
   private async refreshToken(user_id: string): Promise<string> {
     return await signToken({
+      secretOrPrivateKey: process.env.JWT_SECRET_KEY_REFRESH_TOKEN as string,
       payload: { user_id, token_type: TokenType.RefreshToken },
       option: { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME }
     });
@@ -53,13 +63,19 @@ class users {
   }
 
   async register(value: RegisterRequest) {
-    const { password, salt } = await hashPassword({ password: value.password });
+    const user_id = new ObjectId();
+    const [{ password, salt }, email_verify_token] = await Promise.all([
+      hashPassword({ password: value.password }),
+      this.emailVerifyToken(user_id.toString())
+    ]);
 
     const result = await databaseService.users.insertOne(
       new User({
         ...value,
+        _id: user_id,
         date_of_birth: new Date(value.date_of_birth),
         password: password,
+        email_verify_token,
         salt
       })
     );
@@ -68,7 +84,6 @@ class users {
       throw new Error(USER_MESSAGE.ERROR.FAIL_TO_INSERT_USER);
     }
 
-    const user_id = result.insertedId;
     const [access_token, refresh_token] = await this.sightToken(user_id.toString());
 
     return { access_token, refresh_token };
