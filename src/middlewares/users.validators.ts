@@ -250,3 +250,31 @@ export const emailVerifyTokenValidator = validate(
     ['body']
   )
 );
+
+export const forgotPasswordValidator = validate(
+  checkSchema(
+    {
+      email: {
+        notEmpty: {
+          errorMessage: USER_MESSAGE.VALIDATION.EMAIL_IS_REQUIRED
+        },
+        isEmail: {
+          errorMessage: USER_MESSAGE.VALIDATION.EMAIL_IS_INVALID
+        },
+        custom: {
+          options: async (value, { req }) => {
+            const user = await usersService.checkEmailExist(value);
+            if (!user) {
+              throw new Error(USER_MESSAGE.VALIDATION.EMAIL_IS_NOT_REGISTERED);
+            }
+
+            (req as Request).user = user;
+            return true;
+          }
+        },
+        trim: true
+      }
+    },
+    ['body']
+  )
+);

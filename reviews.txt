@@ -1,0 +1,6 @@
+controller chỉ gọi đến service và response về cho client
+service thì tập trung sử lý logic và db
+Lỗi thì tập trung xử lý ở middleware(4 tham số) cuối cùng và response lỗi về cho client
+Các middleware khác hay các hàm chức năng chỉ throw ra lỗi hoặc next(lỗi) đến cho middleware cuối cùng xử lý
+Tạo hàm wrapper cho controller để controller hoặc service throw ra lỗi thì vẫn next(lỗi) đến middleware cuối cùng đc
+Xử lý và bắt lỗi chặt chẽ ở middleware để dễ sử lý

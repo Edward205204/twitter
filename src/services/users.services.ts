@@ -63,6 +63,14 @@ class users {
     return [access_token, refresh_token];
   }
 
+  private async forgotPasswordToken(user_id: string): Promise<string> {
+    return await signToken({
+      secretOrPrivateKey: process.env.JWT_SECRET_KEY_FORGOT_PASSWORD_TOKEN as string,
+      payload: { user_id, token_type: TokenType.ForgotPasswordToken },
+      option: { expiresIn: process.env.FORGOT_PASSWORD_TOKEN_EXPIRATION_TIME as string }
+    });
+  }
+
   async register(value: RegisterRequest) {
     const user_id = new ObjectId();
     const [{ password, salt }, email_verify_token] = await Promise.all([
@@ -138,11 +146,23 @@ class users {
 
   async resendVerifyEmail(user_id: string) {
     const email_verify_token = await this.emailVerifyToken(user_id);
+    // TODO: gửi email_verify_token đến EMAIL người dùng, nhưng giờ chưa implement gửi email
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
       { $set: { email_verify_token }, $currentDate: { updated_at: true } }
     );
     return { email_verify_token };
+  }
+
+  async forgotPassword(user_id: string) {
+    const forgot_password_token = await this.forgotPasswordToken(user_id);
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      { $set: { forgot_password_token }, $currentDate: { updated_at: true } }
+    );
+    // TODO: Gửi email đến người dùng(chưa implement)
+    console.log('forgot_password_token', forgot_password_token);
+    return { message: USER_MESSAGE.AUTH.SENDED_FORGOT_PASSWORD_TO_USER_EMAIL };
   }
 }
 

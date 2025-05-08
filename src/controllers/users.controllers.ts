@@ -1,7 +1,12 @@
 import { Request, Response } from 'express';
 import usersService from '~/services/users.services';
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core';
-import { LogoutReqBody, RegisterRequest, TokenPayload } from '~/models/schemas/requests/User.request';
+import {
+  ForgotPasswordReqBody,
+  LogoutReqBody,
+  RegisterRequest,
+  TokenPayload
+} from '~/models/schemas/requests/User.request';
 import { USER_MESSAGE } from '~/constants/user.message';
 import User from '~/models/schemas/User.schema';
 import { ObjectId } from 'mongodb';
@@ -35,7 +40,8 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   return;
 };
 
-export const verifyEmailTokenController = async (req: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const verifyEmailTokenController = async (req: Request<ParamsDictionary, any, TokenPayload>, res: Response) => {
   const decoded_email_verify_token = req.decoded_email_verify_token as TokenPayload;
   const { user_id } = decoded_email_verify_token;
   const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) });
@@ -79,5 +85,15 @@ export const resendVerifyEmailController = async (req: Request, res: Response) =
 
   const result = await usersService.resendVerifyEmail(user_id);
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGE.TOKEN.EMAIL_VERIFY_TOKEN_IS_RESENT, result });
+  return;
+};
+
+export const forgotPasswordController = async (
+  req: Request<ParamsDictionary, any, ForgotPasswordReqBody>,
+  res: Response
+) => {
+  const { _id } = req.user as User;
+  const result = await usersService.forgotPassword((_id as ObjectId).toString());
+  res.json(result);
   return;
 };

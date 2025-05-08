@@ -1,5 +1,6 @@
 import { JwtPayload } from 'jsonwebtoken';
 import { TokenType } from '~/constants/token_type';
+import User from '../User.schema';
 
 // dùng để làm generic cho các request
 
@@ -17,4 +18,8 @@ export interface TokenPayload extends JwtPayload {
 
 export interface LogoutReqBody {
   refresh_token: string;
+}
+
+export interface ForgotPasswordReqBody {
+  user: User;
 }
