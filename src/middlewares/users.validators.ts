@@ -10,6 +10,7 @@ import { validate } from '~/utils/validate';
 import capitalize from 'lodash/capitalize';
 import databaseService from '~/services/databases.services';
 import { Request } from 'express-validator/lib/base';
+import { ObjectId } from 'mongodb';
 
 export const loginValidator = validate(
   checkSchema(
@@ -273,6 +274,53 @@ export const forgotPasswordValidator = validate(
           }
         },
         trim: true
+      }
+    },
+    ['body']
+  )
+);
+
+export const verifyForgotPasswordValidator = validate(
+  checkSchema(
+    {
+      forgot_password_token: {
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGE.TOKEN.FORGOT_PASSWORD_TOKEN_IS_REQUIRED,
+                status: HTTP_STATUS.UNAUTHORIZED
+              });
+            }
+            try {
+              const { user_id } = await verifyToken({
+                token: value,
+                secretOrPublicKey: process.env.JWT_SECRET_KEY_FORGOT_PASSWORD_TOKEN as string
+              });
+
+              const user = await databaseService.users.findOne({ _id: new ObjectId(user_id as string) });
+              if (!user) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGE.TOKEN.FORGOT_PASSWORD_TOKEN_IS_INVALID,
+                  status: HTTP_STATUS.NOT_FOUND
+                });
+              }
+
+              if (user.forgot_password_token !== value) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGE.TOKEN.FORGOT_PASSWORD_TOKEN_IS_INVALID,
+                  status: HTTP_STATUS.NOT_FOUND
+                });
+              }
+            } catch (error) {
+              throw new ErrorWithStatus({
+                message: capitalize((error as JsonWebTokenError).message),
+                status: HTTP_STATUS.UNAUTHORIZED
+              });
+            }
+            return true;
+          }
+        }
       }
     },
     ['body']

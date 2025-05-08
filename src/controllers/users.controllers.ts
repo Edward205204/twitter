@@ -89,11 +89,17 @@ export const resendVerifyEmailController = async (req: Request, res: Response) =
 };
 
 export const forgotPasswordController = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   req: Request<ParamsDictionary, any, ForgotPasswordReqBody>,
   res: Response
 ) => {
   const { _id } = req.user as User;
   const result = await usersService.forgotPassword((_id as ObjectId).toString());
   res.json(result);
+  return;
+};
+
+export const verifyForgotPasswordController = async (req: Request, res: Response) => {
+  res.json({ message: USER_MESSAGE.AUTH.VALID_FORGOT_PASSWORD_TOKEN });
   return;
 };

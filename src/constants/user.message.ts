@@ -6,7 +6,8 @@ export const USER_MESSAGE = {
     LOGOUT_SUCCESS: 'Logout success',
     EMAIL_OR_PASSWORD_IS_INCORRECT: 'Email or password is incorrect',
     VERIFY_EMAIL_SUCCESS: 'Verify email success',
-    SENDED_FORGOT_PASSWORD_TO_USER_EMAIL: 'Sended forgot password to user email'
+    SENDED_FORGOT_PASSWORD_TO_USER_EMAIL: 'Sended forgot password to user email',
+    VALID_FORGOT_PASSWORD_TOKEN: 'Valid forgot password token'
   },
 
   // Validation messages
@@ -43,7 +44,9 @@ export const USER_MESSAGE = {
     REFRESH_TOKEN_OR_NOT_EXIST: 'Used refresh token or not exist',
     EMAIL_IS_VERIFIED_BEFORE: 'Email is verified before',
     EMAIL_VERIFY_TOKEN_IS_NOT_EXIST_OR_NOT_MATCH: 'Token is not exist or not match',
-    EMAIL_VERIFY_TOKEN_IS_RESENT: 'Email verify token is resent'
+    EMAIL_VERIFY_TOKEN_IS_RESENT: 'Email verify token is resent',
+    FORGOT_PASSWORD_TOKEN_IS_REQUIRED: 'Forgot password token is required',
+    FORGOT_PASSWORD_TOKEN_IS_INVALID: 'Forgot password token is invalid'
   },
 
   // Errors
