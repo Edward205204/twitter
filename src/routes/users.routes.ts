@@ -7,6 +7,7 @@ import {
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
+  updateAccountController,
   verifyEmailTokenController,
   verifyForgotPasswordController
 } from '~/controllers/users.controllers';
@@ -48,7 +49,7 @@ usersRouter.patch(
   accessTokenValidator,
   verifyStatusAccount,
   updateAccountValidator,
-  filterMiddleware<keyof UpdateAccountReqBody>([
+  filterMiddleware<UpdateAccountReqBody>([
     'name',
     'date_of_birth',
     'bio',
@@ -58,7 +59,7 @@ usersRouter.patch(
     'avatar',
     'cover_photo'
   ]),
-  wrapRequestHandler(() => {})
+  wrapRequestHandler(updateAccountController)
 );
 
 export default usersRouter;

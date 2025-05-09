@@ -1,7 +1,7 @@
 import { verify } from 'jsonwebtoken';
 import User from '~/models/schemas/User.schema';
 import databaseService from './databases.services';
-import { RegisterRequest } from '~/models/schemas/requests/User.request';
+import { RegisterRequest, UpdateAccountReqBody } from '~/models/schemas/requests/User.request';
 import dotenv from 'dotenv';
 import { hashPassword } from '~/utils/crypto';
 import { signToken } from '~/utils/jwt';
@@ -10,6 +10,9 @@ import { ObjectId } from 'mongodb';
 import RefreshToken from '~/models/schemas/RefreshToken';
 import { USER_MESSAGE } from '~/constants/user.message';
 import { UserVerifyStatus } from '~/constants/enums';
+import omitBy from 'lodash/omitBy';
+import isUndefined from 'lodash/isUndefined';
+import { MatchKeysAndValues } from 'mongodb';
 dotenv.config();
 class users {
   /**
@@ -231,6 +234,37 @@ class users {
     }
     return {
       message: USER_MESSAGE.AUTH.GET_ME_SUCCESS,
+      result: user
+    };
+  }
+
+  async updateAccount(user_id: string, payload: UpdateAccountReqBody) {
+    const updatePayload = {
+      ...payload,
+      ...(payload.date_of_birth && { date_of_birth: new Date(payload.date_of_birth) })
+    };
+
+    const cleanPayload = omitBy(updatePayload, isUndefined);
+    const user = await databaseService.users.findOneAndUpdate(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: cleanPayload as MatchKeysAndValues<User>,
+        $currentDate: {
+          updated_at: true
+        }
+      },
+      {
+        returnDocument: 'after',
+        projection: {
+          password: 0,
+          salt: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        }
+      }
+    );
+    return {
+      message: USER_MESSAGE.AUTH.UPDATE_ACCOUNT_SUCCESS,
       result: user
     };
   }

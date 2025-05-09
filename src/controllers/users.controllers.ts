@@ -5,7 +5,8 @@ import {
   LogoutReqBody,
   RegisterRequest,
   TokenPayload,
-  ResetPasswordReqBody
+  ResetPasswordReqBody,
+  UpdateAccountReqBody
 } from '~/models/schemas/requests/User.request';
 import { USER_MESSAGE } from '~/constants/user.message';
 import User from '~/models/schemas/User.schema';
@@ -118,6 +119,18 @@ export const resetPasswordController = async (
 export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const result = await usersService.getMe(user_id);
+  res.json(result);
+  return;
+};
+
+export const updateAccountController = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  req: Request<ParamsDictionary, any, UpdateAccountReqBody>,
+  res: Response
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const { body } = req;
+  const result = await usersService.updateAccount(user_id, body);
   res.json(result);
   return;
 };

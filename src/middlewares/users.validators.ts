@@ -14,6 +14,7 @@ import User from '~/models/schemas/User.schema';
 import { UserVerifyStatus } from '~/constants/enums';
 import { NextFunction, Request, Response } from 'express';
 import { isLength } from 'lodash';
+import { TokenPayload } from '~/models/schemas/requests/User.request';
 
 const passwordSchema: ParamSchema = {
   notEmpty: {
@@ -356,7 +357,7 @@ export const resetPasswordValidator = validate(
 );
 
 export const verifyStatusAccount = (req: Request, res: Response, next: NextFunction) => {
-  const { verify } = req.user as User;
+  const { verify } = req.decoded_authorization as TokenPayload;
   if (verify !== UserVerifyStatus.Verified) {
     next(
       new ErrorWithStatus({

@@ -9,7 +9,8 @@ export const USER_MESSAGE = {
     SENDED_FORGOT_PASSWORD_TO_USER_EMAIL: 'Sended forgot password to user email',
     VALID_FORGOT_PASSWORD_TOKEN: 'Valid forgot password token',
     RESET_PASSWORD_SUCCESS: 'Reset password success',
-    GET_ME_SUCCESS: 'Get me success'
+    GET_ME_SUCCESS: 'Get me success',
+    UPDATE_ACCOUNT_SUCCESS: 'Update account success'
   },
 
   // Validation messages
