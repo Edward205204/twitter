@@ -164,6 +164,24 @@ class users {
     console.log('forgot_password_token', forgot_password_token);
     return { message: USER_MESSAGE.AUTH.SENDED_FORGOT_PASSWORD_TO_USER_EMAIL };
   }
+
+  async resetPassword(user_id: ObjectId, salt: string, password: string) {
+    const updated_password = await hashPassword({ password, salt });
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          password: updated_password.password,
+          salt: updated_password.salt,
+          forgot_password_token: ''
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    );
+    return { message: USER_MESSAGE.AUTH.RESET_PASSWORD_SUCCESS };
+  }
 }
 
 const usersService = new users();

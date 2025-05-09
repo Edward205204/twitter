@@ -23,3 +23,12 @@ export interface LogoutReqBody {
 export interface ForgotPasswordReqBody {
   user: User;
 }
+
+/**
+ * @description định nghĩa các trường được gửi lên bằng method POST của request(thuộc route /reset-password)
+ */
+export interface ResetPasswordReqBody {
+  password: string;
+  confirm_password: string;
+  forgot_password_token: string;
+}

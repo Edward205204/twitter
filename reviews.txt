@@ -4,3 +4,14 @@ Lỗi thì tập trung xử lý ở middleware(4 tham số) cuối cùng và res
 Các middleware khác hay các hàm chức năng chỉ throw ra lỗi hoặc next(lỗi) đến cho middleware cuối cùng xử lý
 Tạo hàm wrapper cho controller để controller hoặc service throw ra lỗi thì vẫn next(lỗi) đến middleware cuối cùng đc
 Xử lý và bắt lỗi chặt chẽ ở middleware để dễ sử lý
+
+--------------------------------------------------
+xử lý reset password(sau khi verify reset password token)
+- User gửi lên password, confirm_password, và reset_password_token
+- đầu tiên cần validate
+- tách schema lặp lại để tái sử dụng
+- hoàn thiện validate(sửa lại verify reset password để lấy đc user_id sau khi decoded)
+- tạo controller
+- lấy user_id từ request và gọi vào hàm service
+- hàm service sẽ set value (là password) vào db, và set reset_password_token là rỗng + updateAt
+- trả về message thông báo đăng ký thành công

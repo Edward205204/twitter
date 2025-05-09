@@ -7,7 +7,8 @@ export const USER_MESSAGE = {
     EMAIL_OR_PASSWORD_IS_INCORRECT: 'Email or password is incorrect',
     VERIFY_EMAIL_SUCCESS: 'Verify email success',
     SENDED_FORGOT_PASSWORD_TO_USER_EMAIL: 'Sended forgot password to user email',
-    VALID_FORGOT_PASSWORD_TOKEN: 'Valid forgot password token'
+    VALID_FORGOT_PASSWORD_TOKEN: 'Valid forgot password token',
+    RESET_PASSWORD_SUCCESS: 'Reset password success'
   },
 
   // Validation messages

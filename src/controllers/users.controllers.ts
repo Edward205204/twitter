@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import usersService from '~/services/users.services';
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core';
 import {
-  ForgotPasswordReqBody,
   LogoutReqBody,
   RegisterRequest,
-  TokenPayload
+  TokenPayload,
+  ResetPasswordReqBody
 } from '~/models/schemas/requests/User.request';
 import { USER_MESSAGE } from '~/constants/user.message';
 import User from '~/models/schemas/User.schema';
@@ -88,11 +88,7 @@ export const resendVerifyEmailController = async (req: Request, res: Response) =
   return;
 };
 
-export const forgotPasswordController = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  req: Request<ParamsDictionary, any, ForgotPasswordReqBody>,
-  res: Response
-) => {
+export const forgotPasswordController = async (req: Request, res: Response) => {
   const { _id } = req.user as User;
   const result = await usersService.forgotPassword((_id as ObjectId).toString());
   res.json(result);
@@ -101,5 +97,16 @@ export const forgotPasswordController = async (
 
 export const verifyForgotPasswordController = async (req: Request, res: Response) => {
   res.json({ message: USER_MESSAGE.AUTH.VALID_FORGOT_PASSWORD_TOKEN });
+  return;
+};
+
+export const resetPasswordController = async (
+  req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
+  res: Response
+) => {
+  const { _id, salt } = req.user as User;
+  const { password } = req.body;
+  const result = await usersService.resetPassword(_id as ObjectId, salt, password);
+  res.json(result);
   return;
 };

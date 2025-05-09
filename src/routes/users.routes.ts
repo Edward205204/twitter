@@ -5,6 +5,7 @@ import {
   logoutController,
   registerController,
   resendVerifyEmailController,
+  resetPasswordController,
   verifyEmailTokenController,
   verifyForgotPasswordController
 } from '~/controllers/users.controllers';
@@ -15,6 +16,7 @@ import {
   loginValidator,
   refreshTokenValidate,
   registerValidator,
+  resetPasswordValidator,
   verifyForgotPasswordValidator
 } from '~/middlewares/users.validators';
 import { wrapRequestHandler } from '~/utils/handlers';
@@ -32,5 +34,6 @@ usersRouter.post(
   verifyForgotPasswordValidator,
   wrapRequestHandler(verifyForgotPasswordController)
 );
+usersRouter.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController));
 
 export default usersRouter;
