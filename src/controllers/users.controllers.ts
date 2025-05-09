@@ -101,12 +101,20 @@ export const verifyForgotPasswordController = async (req: Request, res: Response
 };
 
 export const resetPasswordController = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
   res: Response
 ) => {
   const { _id, salt } = req.user as User;
   const { password } = req.body;
   const result = await usersService.resetPassword(_id as ObjectId, salt, password);
+  res.json(result);
+  return;
+};
+
+export const getMeController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const result = await usersService.getMe(user_id);
   res.json(result);
   return;
 };

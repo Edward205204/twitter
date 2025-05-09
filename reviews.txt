@@ -6,6 +6,7 @@ Tạo hàm wrapper cho controller để controller hoặc service throw ra lỗi
 Xử lý và bắt lỗi chặt chẽ ở middleware để dễ sử lý
 
 --------------------------------------------------
+#100 - Reset Password
 xử lý reset password(sau khi verify reset password token)
 - User gửi lên password, confirm_password, và reset_password_token
 - đầu tiên cần validate
@@ -15,3 +16,9 @@ xử lý reset password(sau khi verify reset password token)
 - lấy user_id từ request và gọi vào hàm service
 - hàm service sẽ set value (là password) vào db, và set reset_password_token là rỗng + updateAt
 - trả về message thông báo đăng ký thành công
+
+#101 - Get User
+xử lý get thông tin user sau khi đăng nhập
+- Tạo method get, với middleware là accessTokenValidator
+- Tạo getMe controller, lấy user_id từ decoded_access_token (middleware accessTokenValidator) và gọi service getMe với tham số là user_id
+- Tại getMe service get ra user thông qua user_id rồi return về user(loại trừ field nhạy cảm như password, các token bằng projection mongoDB)

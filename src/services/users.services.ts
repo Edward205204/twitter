@@ -182,6 +182,27 @@ class users {
     );
     return { message: USER_MESSAGE.AUTH.RESET_PASSWORD_SUCCESS };
   }
+
+  async getMe(user_id: string) {
+    const user = await databaseService.users.findOne(
+      { _id: new ObjectId(user_id) },
+      {
+        projection: {
+          password: 0,
+          salt: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        }
+      }
+    );
+    if (!user) {
+      throw new Error(USER_MESSAGE.ERROR.USER_NOT_FOUND);
+    }
+    return {
+      message: USER_MESSAGE.AUTH.GET_ME_SUCCESS,
+      result: user
+    };
+  }
 }
 
 const usersService = new users();
