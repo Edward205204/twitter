@@ -34,7 +34,18 @@ export const USER_MESSAGE = {
       'Confirm password must be 6-50 characters long and contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol',
     CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD: 'Confirm password must be the same as password',
     DATE_OF_BIRTH_MUST_BE_ISO8601: 'Date of birth must be ISO8601',
-    VALIDATION_ERROR: 'Validation error'
+    VALIDATION_ERROR: 'Validation error',
+    ACCOUNT_IS_NOT_VERIFIED: 'Account is not verified',
+    BIO_MUST_BE_A_STRING: 'Bio must be a string',
+    BIO_MUST_BE_LESS_THAN_200_CHARACTERS: 'Bio must be less than 200 characters',
+    LOCATION_MUST_BE_A_STRING: 'Location must be a string',
+    LOCATION_MUST_BE_LESS_THAN_100_CHARACTERS: 'Location must be less than 100 characters',
+    WEBSITE_MUST_BE_A_STRING: 'Website must be a string',
+    WEBSITE_MUST_BE_LESS_THAN_300_CHARACTERS: 'Website must be less than 300 characters',
+    AVATAR_IMG_URL_MUST_BE_A_STRING: 'Avatar img url must be a string',
+    AVATAR_IMG_URL_MUST_BE_LESS_THAN_400_CHARACTERS: 'Avatar img url must be less than 400 characters',
+    USERNAME_MUST_BE_A_STRING: 'Username must be a string',
+    USERNAME_MUST_BE_LESS_THAN_50_CHARACTERS: 'Username must be less than 50 characters'
   },
 
   // Token messages

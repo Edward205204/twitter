@@ -31,7 +31,7 @@ xử lý get thông tin user sau khi đăng nhập
         + Nếu hàm bất đồng bộ thì phải tự next lỗi => Phải next lỗi nếu như không có wrapper handle error nào bọc bên ngoài
 
 - Sửa signToken -> gắn thêm trạng thái tài khoản vào token để dễ dàng lấy ra check từ token đc gửi lên
-- Tạo method PATCH với routes là updateMe(gồm middleware: access token, kiểm tra xem tài khoản có phải là verify hay ko -> nếu verify thì đc thực hiện update nếu chưa thì trả next ra Lỗi)
+- Tạo method PATCH với routes là updateMe(gồm middleware: access token,thêm middleware check status account nếu tài khoản có phải là verify  thì đc thực hiện update nếu chưa thì  next ra Lỗi)
 - Tạo middleware validate các field được update bao gồm: (name, date_of_birth, bio, location, website, username, avatar, cover_photo)
 - Tạo thêm middleware lọc các dữ liệu thừa(chỉ có name, date_of_birth, bio, location, website, username, avatar, cover_photo là đc pass qua validate này)
 - Tạo controller xử lý update tài khoản, lấy data từ req.body và user_id từ access token và truyền vào service xử lý updateMe

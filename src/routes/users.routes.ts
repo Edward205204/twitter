@@ -10,6 +10,7 @@ import {
   verifyEmailTokenController,
   verifyForgotPasswordController
 } from '~/controllers/users.controllers';
+import { filterMiddleware } from '~/middlewares/common.middlewares';
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,
@@ -18,8 +19,11 @@ import {
   refreshTokenValidate,
   registerValidator,
   resetPasswordValidator,
-  verifyForgotPasswordValidator
+  updateAccountValidator,
+  verifyForgotPasswordValidator,
+  verifyStatusAccount
 } from '~/middlewares/users.validators';
+import { UpdateAccountReqBody } from '~/models/schemas/requests/User.request';
 import { wrapRequestHandler } from '~/utils/handlers';
 
 const usersRouter = Router();
@@ -38,9 +42,22 @@ usersRouter.post(
 usersRouter.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController));
 
 usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(getMeController));
+
 usersRouter.patch(
   '/update-me',
   accessTokenValidator,
+  verifyStatusAccount,
+  updateAccountValidator,
+  filterMiddleware<keyof UpdateAccountReqBody>([
+    'name',
+    'date_of_birth',
+    'bio',
+    'location',
+    'website',
+    'username',
+    'avatar',
+    'cover_photo'
+  ]),
   wrapRequestHandler(() => {})
 );
 
