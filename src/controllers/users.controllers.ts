@@ -16,8 +16,9 @@ import { UserVerifyStatus } from '~/constants/enums';
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as User;
+  const verify = user.verify as UserVerifyStatus;
   const user_id = user._id as ObjectId;
-  const result = await usersService.login(user_id);
+  const result = await usersService.login({ user_id, verify });
   if (!result) {
     return next({ message: USER_MESSAGE.VALIDATION.CONFIRM_PASSWORD_IS_REQUIRED });
   }
@@ -45,6 +46,7 @@ export const verifyEmailTokenController = async (req: Request<ParamsDictionary, 
   const decoded_email_verify_token = req.decoded_email_verify_token as TokenPayload;
   const { user_id } = decoded_email_verify_token;
   const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) });
+
   if (!user) {
     res.status(HTTP_STATUS.NOT_FOUND).json({
       message: USER_MESSAGE.ERROR.USER_NOT_FOUND
@@ -90,7 +92,8 @@ export const resendVerifyEmailController = async (req: Request, res: Response) =
 
 export const forgotPasswordController = async (req: Request, res: Response) => {
   const { _id } = req.user as User;
-  const result = await usersService.forgotPassword((_id as ObjectId).toString());
+  const verify = (req.user as User).verify as UserVerifyStatus;
+  const result = await usersService.forgotPassword({ user_id: (_id as ObjectId).toString(), verify });
   res.json(result);
   return;
 };

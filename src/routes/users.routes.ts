@@ -38,5 +38,10 @@ usersRouter.post(
 usersRouter.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController));
 
 usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(getMeController));
+usersRouter.patch(
+  '/update-me',
+  accessTokenValidator,
+  wrapRequestHandler(() => {})
+);
 
 export default usersRouter;

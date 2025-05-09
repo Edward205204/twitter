@@ -1,3 +1,4 @@
+import { verify } from 'jsonwebtoken';
 import User from '~/models/schemas/User.schema';
 import databaseService from './databases.services';
 import { RegisterRequest } from '~/models/schemas/requests/User.request';
@@ -21,18 +22,18 @@ class users {
    * - Token will be signed with RS256 algorithm
    * - Token will be signed with JWT_SECRET_KEY
    */
-  private async accessToken(user_id: string): Promise<string> {
+  private async accessToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }): Promise<string> {
     return await signToken({
       secretOrPrivateKey: process.env.JWT_SECRET_KEY_ACCESS_TOKEN as string,
-      payload: { user_id, token_type: TokenType.AccessToken },
+      payload: { user_id, token_type: TokenType.AccessToken, verify },
       option: { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME }
     });
   }
 
-  private async emailVerifyToken(user_id: string): Promise<string> {
+  private async emailVerifyToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }): Promise<string> {
     return await signToken({
       secretOrPrivateKey: process.env.JWT_SECRET_KEY_EMAIL_VERIFY_TOKEN as string,
-      payload: { user_id, token_type: TokenType.EmailVerificationToken },
+      payload: { user_id, token_type: TokenType.EmailVerificationToken, verify },
       option: { expiresIn: process.env.EMAIL_VERIFY_TOKEN_EXPIRATION_TIME as string }
     });
   }
@@ -47,26 +48,38 @@ class users {
    * - Token will be signed with RS256 algorithm
    * - Token will be signed with JWT_SECRET_KEY
    */
-  private async refreshToken(user_id: string): Promise<string> {
+  private async refreshToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }): Promise<string> {
     return await signToken({
       secretOrPrivateKey: process.env.JWT_SECRET_KEY_REFRESH_TOKEN as string,
-      payload: { user_id, token_type: TokenType.RefreshToken },
+      payload: { user_id, token_type: TokenType.RefreshToken, verify },
       option: { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME }
     });
   }
 
-  private async sightAccessTokenAndRefreshToken(user_id: string): Promise<string[]> {
+  private async sightAccessTokenAndRefreshToken({
+    user_id,
+    verify
+  }: {
+    user_id: string;
+    verify: UserVerifyStatus;
+  }): Promise<string[]> {
     const [access_token, refresh_token] = await Promise.all([
-      this.accessToken(user_id.toString()),
-      this.refreshToken(user_id.toString())
+      this.accessToken({ user_id, verify }),
+      this.refreshToken({ user_id, verify })
     ]);
     return [access_token, refresh_token];
   }
 
-  private async forgotPasswordToken(user_id: string): Promise<string> {
+  private async forgotPasswordToken({
+    user_id,
+    verify
+  }: {
+    user_id: string;
+    verify: UserVerifyStatus;
+  }): Promise<string> {
     return await signToken({
       secretOrPrivateKey: process.env.JWT_SECRET_KEY_FORGOT_PASSWORD_TOKEN as string,
-      payload: { user_id, token_type: TokenType.ForgotPasswordToken },
+      payload: { user_id, token_type: TokenType.ForgotPasswordToken, verify },
       option: { expiresIn: process.env.FORGOT_PASSWORD_TOKEN_EXPIRATION_TIME as string }
     });
   }
@@ -75,7 +88,8 @@ class users {
     const user_id = new ObjectId();
     const [{ password, salt }, email_verify_token] = await Promise.all([
       hashPassword({ password: value.password }),
-      this.emailVerifyToken(user_id.toString())
+      this.emailVerifyToken({ user_id: user_id.toString(), verify: UserVerifyStatus.Unverified })
+      // Khi tạo user thì chưa verify email nên set verify là Unverified
     ]);
 
     const result = await databaseService.users.insertOne(
@@ -93,13 +107,20 @@ class users {
       throw new Error(USER_MESSAGE.ERROR.FAIL_TO_INSERT_USER);
     }
 
-    const [access_token, refresh_token] = await this.sightAccessTokenAndRefreshToken(user_id.toString());
+    const [access_token, refresh_token] = await this.sightAccessTokenAndRefreshToken({
+      user_id: user_id.toString(),
+      verify: UserVerifyStatus.Unverified
+      // Khi tạo user thì chưa verify email nên set verify là Unverified
+    });
 
     return { access_token, refresh_token };
   }
 
-  async login(user_id: ObjectId) {
-    const [access_token, refresh_token] = await this.sightAccessTokenAndRefreshToken(user_id.toString());
+  async login({ user_id, verify }: { user_id: ObjectId; verify: UserVerifyStatus }) {
+    const [access_token, refresh_token] = await this.sightAccessTokenAndRefreshToken({
+      user_id: user_id.toString(),
+      verify
+    });
     await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token }));
     return { access_token, refresh_token };
   }
@@ -118,13 +139,21 @@ class users {
     return { message: USER_MESSAGE.AUTH.LOGOUT_SUCCESS };
   }
 
+  /**
+   * @param user_id
+   * @returns Promise<string>
+   * @description
+   * - Hàm này dùng để verify email cho user
+   * - Khi hàm này chạy có nghĩa là user đã tiến hành verify email rồi
+   * @returns Promise<{ access_token: string; refresh_token: string }>
+   */
   async verifyEmail(user_id: string) {
     // Khi thực hiện update_at thì có hai thời điểm
     // 1. Thời điểm tạo giá trị, 2. Thời điểm cập nhật giá trị
     // Dùng currentDate để cập nhật (thời điểm cập nhật giá trị)
     // Hoặc dùng "$$NOW" để cập nhật (thời điểm tạo giá trị)
     const [[access_token, refresh_token]] = await Promise.all([
-      this.sightAccessTokenAndRefreshToken(user_id.toString()),
+      this.sightAccessTokenAndRefreshToken({ user_id: user_id.toString(), verify: UserVerifyStatus.Verified }),
       databaseService.users.updateOne(
         { _id: new ObjectId(user_id) },
         {
@@ -145,8 +174,10 @@ class users {
   }
 
   async resendVerifyEmail(user_id: string) {
-    const email_verify_token = await this.emailVerifyToken(user_id);
+    // Khi gửi lại email verify tức là lúc này vẫn chưa verify email thành công
+    const email_verify_token = await this.emailVerifyToken({ user_id, verify: UserVerifyStatus.Unverified });
     // TODO: gửi email_verify_token đến EMAIL người dùng, nhưng giờ chưa implement gửi email
+    console.log(email_verify_token);
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
       { $set: { email_verify_token }, $currentDate: { updated_at: true } }
@@ -154,8 +185,8 @@ class users {
     return { email_verify_token };
   }
 
-  async forgotPassword(user_id: string) {
-    const forgot_password_token = await this.forgotPasswordToken(user_id);
+  async forgotPassword({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
+    const forgot_password_token = await this.forgotPasswordToken({ user_id, verify });
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
       { $set: { forgot_password_token }, $currentDate: { updated_at: true } }
