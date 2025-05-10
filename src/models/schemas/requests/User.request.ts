@@ -45,3 +45,7 @@ export interface UpdateAccountReqBody {
   avatar?: string;
   cover_photo?: string;
 }
+
+export interface GetProfileRequest {
+  username: string;
+}

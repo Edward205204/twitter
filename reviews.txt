@@ -36,3 +36,14 @@ xử lý get thông tin user sau khi đăng nhập
 - Tạo thêm middleware lọc các dữ liệu thừa(chỉ có name, date_of_birth, bio, location, website, username, avatar, cover_photo là đc pass qua validate này)
 - Tạo controller xử lý update tài khoản, lấy data từ req.body và user_id từ access token và truyền vào service xử lý updateMe
 - Tạo service nhận user_id và data và update vào db(xử lý bằng method findOneAndUpdates + xử dụng tham số returnNewDocument để nhận collection đc cập nhật vào db và dùng projection để lọc ra dữ liệu nhạy cảm trước khi trả data về)
+
+#107 - Get User Profile
+* Note: + Lấy user bằng get và params là username
+        + Hiện tại username không đc tạo khi đăng kí và có giá trị là ''
+- Tạo username mặc định khi đăng kí tài khoản, user{user_id}
+- Tạo routes getProfile user với params là /:username
+- Không cần middleware cho api này(không cần đăng nhập để truy cập api)
+- Tạo controller gọi vào service getProfile bằng id đc lấy từ params truyền lên server
+- lấy profile từ db bằng username, projection các thông tin nhạy cảm trước khi trả về
+- return data
+- xử lý vấn đề typescript 

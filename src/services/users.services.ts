@@ -13,6 +13,8 @@ import { UserVerifyStatus } from '~/constants/enums';
 import omitBy from 'lodash/omitBy';
 import isUndefined from 'lodash/isUndefined';
 import { MatchKeysAndValues } from 'mongodb';
+import { ErrorWithStatus } from '~/models/Errors';
+import { HTTP_STATUS } from '~/constants/http_request';
 dotenv.config();
 class users {
   /**
@@ -102,7 +104,8 @@ class users {
         date_of_birth: new Date(value.date_of_birth),
         password: password,
         email_verify_token,
-        salt
+        salt,
+        username: `user${user_id.toString()}`
       })
     );
 
@@ -265,6 +268,32 @@ class users {
     );
     return {
       message: USER_MESSAGE.AUTH.UPDATE_ACCOUNT_SUCCESS,
+      result: user
+    };
+  }
+
+  async getProfile(username: string) {
+    const user = await databaseService.users.findOne(
+      { username },
+      {
+        projection: {
+          password: 0,
+          salt: 0,
+          created_at: 0,
+          updated_at: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        }
+      }
+    );
+    if (!user) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: USER_MESSAGE.ERROR.USER_NOT_FOUND
+      });
+    }
+    return {
+      message: USER_MESSAGE.AUTH.GET_PROFILE_SUCCESS,
       result: user
     };
   }

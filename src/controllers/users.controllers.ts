@@ -6,7 +6,8 @@ import {
   RegisterRequest,
   TokenPayload,
   ResetPasswordReqBody,
-  UpdateAccountReqBody
+  UpdateAccountReqBody,
+  GetProfileRequest
 } from '~/models/schemas/requests/User.request';
 import { USER_MESSAGE } from '~/constants/user.message';
 import User from '~/models/schemas/User.schema';
@@ -131,6 +132,13 @@ export const updateAccountController = async (
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { body } = req;
   const result = await usersService.updateAccount(user_id, body);
+  res.json(result);
+  return;
+};
+
+export const getProfileController = async (req: Request<GetProfileRequest>, res: Response) => {
+  const { username } = req.params;
+  const result = await usersService.getProfile(username);
   res.json(result);
   return;
 };
