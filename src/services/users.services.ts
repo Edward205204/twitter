@@ -317,6 +317,26 @@ class users {
     return { message: USER_MESSAGE.AUTH.FOLLOWED_USER_SUCCESS };
   }
 
+  async unfollow(user_id: string, followed_user_id: string) {
+    const isFollowed = await databaseService.follows.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    });
+
+    if (!isFollowed) {
+      return {
+        message: USER_MESSAGE.AUTH.NOT_FOLLOWED_THIS_USER
+      };
+    }
+
+    await databaseService.follows.deleteOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    });
+    return {
+      message: USER_MESSAGE.AUTH.UNFOLLOWED_USER_SUCCESS
+    };
+  }
   async checkUsernameExist(username: string) {
     // kiểm tra xem username có tồn tại trong database hay chưa
     const user = await databaseService.users.findOne({ username });

@@ -13,7 +13,9 @@ export const USER_MESSAGE = {
     UPDATE_ACCOUNT_SUCCESS: 'Update account success',
     GET_PROFILE_SUCCESS: 'Get profile success',
     FOLLOWED_USER_SUCCESS: 'Followed user success',
-    FOLLOWED_USER_ALREADY: 'Followed user already'
+    FOLLOWED_USER_ALREADY: 'Followed user already',
+    UNFOLLOWED_USER_SUCCESS: 'Unfollowed user success',
+    NOT_FOLLOWED_THIS_USER: 'Not followed this user'
   },
 
   // Validation messages
@@ -53,7 +55,8 @@ export const USER_MESSAGE = {
       'Username must be 4 - 15 characters,not start with a number, and not contain special characters',
     FOLLOWED_USER_ID_MUST_BE_A_STRING: 'Followed user id must be a string',
     USER_ID_NOT_VALID: 'User id not valid',
-    USERNAME_ALREADY_EXISTS: 'Username already exists'
+    USERNAME_ALREADY_EXISTS: 'Username already exists',
+    CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Cannot follow or unfollow yourself'
   },
 
   // Token messages

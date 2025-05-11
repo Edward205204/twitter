@@ -1,3 +1,4 @@
+import { ParamsDictionary } from 'express-serve-static-core';
 import { JwtPayload } from 'jsonwebtoken';
 import { TokenType } from '~/constants/token_type';
 import User from '../User.schema';
@@ -50,6 +51,9 @@ export interface FollowReqBody {
   followed_user_id: string;
 }
 
+export interface UnfollowReqParams extends ParamsDictionary {
+  followed_user_id: string;
+}
 export interface GetProfileReqParams {
   username: string;
 }

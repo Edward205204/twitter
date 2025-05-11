@@ -9,6 +9,7 @@ import {
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
+  unfollowController,
   updateAccountController,
   verifyEmailTokenController,
   verifyForgotPasswordController
@@ -73,6 +74,14 @@ usersRouter.post(
   verifyStatusAccount,
   verifyFollowedUserId,
   wrapRequestHandler(followController)
+);
+
+usersRouter.delete(
+  '/follow/:followed_user_id',
+  accessTokenValidator,
+  verifyStatusAccount,
+  verifyFollowedUserId,
+  wrapRequestHandler(unfollowController)
 );
 
 export default usersRouter;

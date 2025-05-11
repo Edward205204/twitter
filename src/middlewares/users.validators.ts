@@ -83,6 +83,13 @@ const followedUserIdSchema: ParamSchema = {
         });
       }
 
+      if (value === (req as Request).decoded_authorization?.user_id) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGE.VALIDATION.CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF,
+          status: HTTP_STATUS.BAD_REQUEST
+        });
+      }
+
       const user = await databaseService.users.findOne({ _id: new ObjectId(value) });
       if (!user) {
         throw new ErrorWithStatus({
@@ -475,6 +482,6 @@ export const verifyFollowedUserId = validate(
     {
       followed_user_id: followedUserIdSchema
     },
-    ['body']
+    ['body', 'params']
   )
 );
