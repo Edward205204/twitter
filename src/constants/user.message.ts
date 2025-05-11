@@ -15,7 +15,8 @@ export const USER_MESSAGE = {
     FOLLOWED_USER_SUCCESS: 'Followed user success',
     FOLLOWED_USER_ALREADY: 'Followed user already',
     UNFOLLOWED_USER_SUCCESS: 'Unfollowed user success',
-    NOT_FOLLOWED_THIS_USER: 'Not followed this user'
+    NOT_FOLLOWED_THIS_USER: 'Not followed this user',
+    CHANGE_PASSWORD_SUCCESS: 'Change password success'
   },
 
   // Validation messages
@@ -56,7 +57,8 @@ export const USER_MESSAGE = {
     FOLLOWED_USER_ID_MUST_BE_A_STRING: 'Followed user id must be a string',
     USER_ID_NOT_VALID: 'User id not valid',
     USERNAME_ALREADY_EXISTS: 'Username already exists',
-    CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Cannot follow or unfollow yourself'
+    CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Cannot follow or unfollow yourself',
+    PASSWORD_IS_INCORRECT: 'Password is incorrect'
   },
 
   // Token messages

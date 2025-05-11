@@ -485,3 +485,28 @@ export const verifyFollowedUserId = validate(
     ['body', 'params']
   )
 );
+
+export const changePasswordValidator = validate(
+  checkSchema(
+    {
+      current_password: {
+        ...passwordSchema,
+        custom: {
+          options: async (value, { req }) => {
+            const { user_id } = req.decoded_authorization as TokenPayload;
+            const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) });
+            if (!user)
+              throw new ErrorWithStatus({ message: USER_MESSAGE.ERROR.USER_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND });
+
+            (req as Request).user = user;
+
+            return true;
+          }
+        }
+      },
+      password: passwordSchema,
+      confirm_password: confirmPasswordSchema
+    },
+    ['body']
+  )
+);

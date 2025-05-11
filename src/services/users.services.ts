@@ -342,6 +342,23 @@ class users {
     const user = await databaseService.users.findOne({ username });
     return !!user;
   }
+
+  async changePassword(user: User, password: string, current_password: string) {
+    const isCorrectPassword = await hashPassword({ password: current_password, salt: user.salt });
+    if (isCorrectPassword.password !== user.password) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGE.VALIDATION.PASSWORD_IS_INCORRECT,
+        status: HTTP_STATUS.UNPROCESSABLE_ENTITY
+      });
+    }
+
+    const updated_password = await hashPassword({ password });
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user._id) },
+      { $set: { password: updated_password.password, salt: updated_password.salt }, $currentDate: { updated_at: true } }
+    );
+    return { message: USER_MESSAGE.AUTH.CHANGE_PASSWORD_SUCCESS };
+  }
 }
 
 const usersService = new users();

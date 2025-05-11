@@ -48,7 +48,7 @@ xử lý get thông tin user sau khi đăng nhập
 - return data
 - xử lý vấn đề typescript
 
-#108 - #109 - Follow user and unfollow user
+#108 - #109 -#110 - Follow user and unfollow user
 * Follow
 - Tạo schema follow, gồm 4 field là user_id, followed_user_id, create_at, _id.
 - Tạo routes follow method là post với body là followed_user_id: string.
@@ -60,3 +60,10 @@ xử lý get thông tin user sau khi đăng nhập
 * unfollow
 - Tạo route với method là delete(/follow/:followed_user_id)
 - Sẽ có những middleware như access token, verify account status, dùng lại verify followed_user_id của api Follow
+
+#111 - Change password
+
+- Tạo routes method post với body là current_password, password, confirm_password
+- Tạo controller: dùng lại access token, verify account status và thêm controller để check body
+- Tạo controller lấy _id của user từ decoded_access_token, sau đó gửi _id và service change_password
+- Tạo change_password service để thay đổi password sau đó update và db dựa vào _id 
