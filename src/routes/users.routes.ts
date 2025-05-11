@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  followController,
   forgotPasswordController,
   getMeController,
   getProfileController,
@@ -22,6 +23,7 @@ import {
   registerValidator,
   resetPasswordValidator,
   updateAccountValidator,
+  verifyFollowedUserId,
   verifyForgotPasswordValidator,
   verifyStatusAccount
 } from '~/middlewares/users.validators';
@@ -64,4 +66,13 @@ usersRouter.patch(
 );
 
 usersRouter.get('/:username', wrapRequestHandler(getProfileController));
+
+usersRouter.post(
+  '/follow',
+  accessTokenValidator,
+  verifyStatusAccount,
+  verifyFollowedUserId,
+  wrapRequestHandler(followController)
+);
+
 export default usersRouter;

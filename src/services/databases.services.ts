@@ -3,7 +3,8 @@
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 import User from '~/models/schemas/User.schema';
-import RefreshToken from '~/models/schemas/RefreshToken';
+import RefreshToken from '~/models/schemas/RefreshToken.schema';
+import Follow from '~/models/schemas/Follow.schema';
 dotenv.config();
 
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xbg5c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -39,6 +40,10 @@ class Databases {
 
   get refresh_tokens(): Collection<RefreshToken> {
     return this.db.collection(process.env.DB_REFRESH_TOKEN_COLLECTION as string);
+  }
+
+  get follows(): Collection<Follow> {
+    return this.db.collection(process.env.DB_FOLLOW_COLLECTION as string);
   }
 }
 

@@ -46,4 +46,17 @@ xử lý get thông tin user sau khi đăng nhập
 - Tạo controller gọi vào service getProfile bằng id đc lấy từ params truyền lên server
 - lấy profile từ db bằng username, projection các thông tin nhạy cảm trước khi trả về
 - return data
-- xử lý vấn đề typescript 
+- xử lý vấn đề typescript
+
+#108 - #109 - Follow user and unfollow user
+* Follow
+- Tạo schema follow, gồm 4 field là user_id, followed_user_id, create_at, _id.
+- Tạo routes follow method là post với body là followed_user_id: string.
+- Cần verify access token và check verify status của tài khoản
+- Tạo middleware để kiểm tra followed_user_id này có hợp lệ hay không(có phải là id đc tạo bởi mongoDB?) và kiểm tra xem người dùng này có tồn tại trong db hay không - tránh follow nullL(middleware này sẽ tái sử dụng ở unfollow nên cần phải trả về lỗi phù hợp để dùng ở cả hai)
+- Tạo controller lấy user_id từ decoded_access_token và followed_user_id từ body, gọi service follow
+- Tạo service follow nhận user_id và followed_user_id, check xem,user_id đã từng followed_user_id này hay chưa? Nếu có rồi thì return về message đã follow, còn chưa từng follow thì lưu vào db rồi trả về message follow success
+
+* unfollow
+- Tạo route với method là delete(/follow/:followed_user_id)
+- Sẽ có những middleware như access token, verify account status, dùng lại verify followed_user_id của api Follow

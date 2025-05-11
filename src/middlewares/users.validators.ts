@@ -1,5 +1,5 @@
 import { checkSchema, ParamSchema } from 'express-validator';
-import { JsonWebTokenError } from 'jsonwebtoken';
+import { JsonWebTokenError, verify } from 'jsonwebtoken';
 import { HTTP_STATUS } from '~/constants/http_request';
 import { USER_MESSAGE } from '~/constants/user.message';
 import { ErrorWithStatus } from '~/models/Errors';
@@ -66,6 +66,31 @@ const imageSchema: ParamSchema = {
   isLength: {
     options: { max: 400 },
     errorMessage: USER_MESSAGE.VALIDATION.AVATAR_IMG_URL_MUST_BE_LESS_THAN_400_CHARACTERS
+  }
+};
+
+const followedUserIdSchema: ParamSchema = {
+  isString: {
+    errorMessage: USER_MESSAGE.VALIDATION.FOLLOWED_USER_ID_MUST_BE_A_STRING
+  },
+  custom: {
+    options: async (value: string, { req }) => {
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGE.VALIDATION.USER_ID_NOT_VALID,
+          status: HTTP_STATUS.NOT_FOUND
+        });
+      }
+
+      const user = await databaseService.users.findOne({ _id: new ObjectId(value) });
+      if (!user) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGE.ERROR.USER_NOT_FOUND,
+          status: HTTP_STATUS.NOT_FOUND
+        });
+      }
+      return true;
+    }
   }
 };
 
@@ -371,58 +396,70 @@ export const verifyStatusAccount = (req: Request, res: Response, next: NextFunct
 };
 
 export const updateAccountValidator = validate(
-  checkSchema({
-    name: {
-      ...nameSchema,
-      optional: true,
-      notEmpty: false
-    },
-    date_of_birth: { ...dateOfBirthSchema, optional: true, notEmpty: false },
-    bio: {
-      optional: true,
-      isString: {
-        errorMessage: USER_MESSAGE.VALIDATION.BIO_MUST_BE_A_STRING
+  checkSchema(
+    {
+      name: {
+        ...nameSchema,
+        optional: true,
+        notEmpty: false
       },
-      trim: true,
-      isLength: {
-        options: { max: 200 },
-        errorMessage: USER_MESSAGE.VALIDATION.BIO_MUST_BE_LESS_THAN_200_CHARACTERS
-      }
-    },
-    location: {
-      optional: true,
-      isString: {
-        errorMessage: USER_MESSAGE.VALIDATION.LOCATION_MUST_BE_A_STRING
+      date_of_birth: { ...dateOfBirthSchema, optional: true, notEmpty: false },
+      bio: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.VALIDATION.BIO_MUST_BE_A_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { max: 200 },
+          errorMessage: USER_MESSAGE.VALIDATION.BIO_MUST_BE_LESS_THAN_200_CHARACTERS
+        }
       },
-      trim: true,
-      isLength: {
-        options: { max: 100 },
-        errorMessage: USER_MESSAGE.VALIDATION.LOCATION_MUST_BE_LESS_THAN_100_CHARACTERS
-      }
-    },
-    website: {
-      optional: true,
-      isString: {
-        errorMessage: USER_MESSAGE.VALIDATION.WEBSITE_MUST_BE_A_STRING
+      location: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.VALIDATION.LOCATION_MUST_BE_A_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { max: 100 },
+          errorMessage: USER_MESSAGE.VALIDATION.LOCATION_MUST_BE_LESS_THAN_100_CHARACTERS
+        }
       },
-      trim: true,
-      isLength: {
-        options: { max: 300 },
-        errorMessage: USER_MESSAGE.VALIDATION.WEBSITE_MUST_BE_LESS_THAN_300_CHARACTERS
-      }
-    },
-    username: {
-      optional: true,
-      isString: {
-        errorMessage: USER_MESSAGE.VALIDATION.USERNAME_MUST_BE_A_STRING
+      website: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.VALIDATION.WEBSITE_MUST_BE_A_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { max: 300 },
+          errorMessage: USER_MESSAGE.VALIDATION.WEBSITE_MUST_BE_LESS_THAN_300_CHARACTERS
+        }
       },
-      trim: true,
-      isLength: {
-        options: { max: 50 },
-        errorMessage: USER_MESSAGE.VALIDATION.USERNAME_MUST_BE_LESS_THAN_50_CHARACTERS
-      }
+      username: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.VALIDATION.USERNAME_MUST_BE_A_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { max: 50 },
+          errorMessage: USER_MESSAGE.VALIDATION.USERNAME_MUST_BE_LESS_THAN_50_CHARACTERS
+        }
+      },
+      avatar: imageSchema,
+      cover_photo: imageSchema
     },
-    avatar: imageSchema,
-    cover_photo: imageSchema
-  })
+    ['body']
+  )
+);
+
+export const verifyFollowedUserId = validate(
+  checkSchema(
+    {
+      followed_user_id: followedUserIdSchema
+    },
+    ['body']
+  )
 );

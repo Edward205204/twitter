@@ -7,7 +7,7 @@ import { hashPassword } from '~/utils/crypto';
 import { signToken } from '~/utils/jwt';
 import { TokenType } from '~/constants/token_type';
 import { ObjectId } from 'mongodb';
-import RefreshToken from '~/models/schemas/RefreshToken';
+import RefreshToken from '~/models/schemas/RefreshToken.schema';
 import { USER_MESSAGE } from '~/constants/user.message';
 import { UserVerifyStatus } from '~/constants/enums';
 import omitBy from 'lodash/omitBy';
@@ -15,6 +15,7 @@ import isUndefined from 'lodash/isUndefined';
 import { MatchKeysAndValues } from 'mongodb';
 import { ErrorWithStatus } from '~/models/Errors';
 import { HTTP_STATUS } from '~/constants/http_request';
+import Follow from '~/models/schemas/Follow.schema';
 dotenv.config();
 class users {
   /**
@@ -296,6 +297,24 @@ class users {
       message: USER_MESSAGE.AUTH.GET_PROFILE_SUCCESS,
       result: user
     };
+  }
+
+  async follow(user_id: string, followed_user_id: string) {
+    const isFollowed = await databaseService.follows.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    });
+
+    if (isFollowed) {
+      return {
+        message: USER_MESSAGE.AUTH.FOLLOWED_USER_ALREADY
+      };
+    }
+
+    await databaseService.follows.insertOne(
+      new Follow({ user_id: new ObjectId(user_id), followed_user_id: new ObjectId(followed_user_id) })
+    );
+    return { message: USER_MESSAGE.AUTH.FOLLOWED_USER_SUCCESS };
   }
 }
 

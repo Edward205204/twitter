@@ -7,7 +7,8 @@ import {
   TokenPayload,
   ResetPasswordReqBody,
   UpdateAccountReqBody,
-  GetProfileRequest
+  FollowReqBody,
+  GetProfileReqParams
 } from '~/models/schemas/requests/User.request';
 import { USER_MESSAGE } from '~/constants/user.message';
 import User from '~/models/schemas/User.schema';
@@ -136,9 +137,18 @@ export const updateAccountController = async (
   return;
 };
 
-export const getProfileController = async (req: Request<GetProfileRequest>, res: Response) => {
+export const getProfileController = async (req: Request<GetProfileReqParams>, res: Response) => {
   const { username } = req.params;
   const result = await usersService.getProfile(username);
+  res.json(result);
+  return;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const followController = async (req: Request<ParamsDictionary, any, FollowReqBody>, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const { followed_user_id } = req.body;
+  const result = await usersService.follow(user_id, followed_user_id);
   res.json(result);
   return;
 };

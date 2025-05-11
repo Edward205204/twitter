@@ -11,7 +11,9 @@ export const USER_MESSAGE = {
     RESET_PASSWORD_SUCCESS: 'Reset password success',
     GET_ME_SUCCESS: 'Get me success',
     UPDATE_ACCOUNT_SUCCESS: 'Update account success',
-    GET_PROFILE_SUCCESS: 'Get profile success'
+    GET_PROFILE_SUCCESS: 'Get profile success',
+    FOLLOWED_USER_SUCCESS: 'Followed user success',
+    FOLLOWED_USER_ALREADY: 'Followed user already'
   },
 
   // Validation messages
@@ -47,7 +49,9 @@ export const USER_MESSAGE = {
     AVATAR_IMG_URL_MUST_BE_A_STRING: 'Avatar img url must be a string',
     AVATAR_IMG_URL_MUST_BE_LESS_THAN_400_CHARACTERS: 'Avatar img url must be less than 400 characters',
     USERNAME_MUST_BE_A_STRING: 'Username must be a string',
-    USERNAME_MUST_BE_LESS_THAN_50_CHARACTERS: 'Username must be less than 50 characters'
+    USERNAME_MUST_BE_LESS_THAN_50_CHARACTERS: 'Username must be less than 50 characters',
+    FOLLOWED_USER_ID_MUST_BE_A_STRING: 'Followed user id must be a string',
+    USER_ID_NOT_VALID: 'User id not valid'
   },
 
   // Token messages
