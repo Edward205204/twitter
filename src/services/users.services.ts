@@ -316,6 +316,12 @@ class users {
     );
     return { message: USER_MESSAGE.AUTH.FOLLOWED_USER_SUCCESS };
   }
+
+  async checkUsernameExist(username: string) {
+    // kiểm tra xem username có tồn tại trong database hay chưa
+    const user = await databaseService.users.findOne({ username });
+    return !!user;
+  }
 }
 
 const usersService = new users();

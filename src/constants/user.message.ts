@@ -49,9 +49,11 @@ export const USER_MESSAGE = {
     AVATAR_IMG_URL_MUST_BE_A_STRING: 'Avatar img url must be a string',
     AVATAR_IMG_URL_MUST_BE_LESS_THAN_400_CHARACTERS: 'Avatar img url must be less than 400 characters',
     USERNAME_MUST_BE_A_STRING: 'Username must be a string',
-    USERNAME_MUST_BE_LESS_THAN_50_CHARACTERS: 'Username must be less than 50 characters',
+    USER_NAME_NOT_VALID:
+      'Username must be 4 - 15 characters,not start with a number, and not contain special characters',
     FOLLOWED_USER_ID_MUST_BE_A_STRING: 'Followed user id must be a string',
-    USER_ID_NOT_VALID: 'User id not valid'
+    USER_ID_NOT_VALID: 'User id not valid',
+    USERNAME_ALREADY_EXISTS: 'Username already exists'
   },
 
   // Token messages

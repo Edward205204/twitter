@@ -50,6 +50,6 @@ export interface FollowReqBody {
   followed_user_id: string;
 }
 
-export interface GetProfileRequest {
+export interface GetProfileReqParams {
   username: string;
 }

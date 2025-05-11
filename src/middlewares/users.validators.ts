@@ -15,6 +15,7 @@ import { UserVerifyStatus } from '~/constants/enums';
 import { NextFunction, Request, Response } from 'express';
 import { isLength } from 'lodash';
 import { TokenPayload } from '~/models/schemas/requests/User.request';
+import { USER_NAME_REGEX } from '~/constants/regex';
 
 const passwordSchema: ParamSchema = {
   notEmpty: {
@@ -443,9 +444,23 @@ export const updateAccountValidator = validate(
           errorMessage: USER_MESSAGE.VALIDATION.USERNAME_MUST_BE_A_STRING
         },
         trim: true,
-        isLength: {
-          options: { max: 50 },
-          errorMessage: USER_MESSAGE.VALIDATION.USERNAME_MUST_BE_LESS_THAN_50_CHARACTERS
+        custom: {
+          options: async (value) => {
+            if (!value) return true; // nếu không có username thì sẽ không validate
+            if (!USER_NAME_REGEX.test(value)) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGE.VALIDATION.USER_NAME_NOT_VALID,
+                status: HTTP_STATUS.UNPROCESSABLE_ENTITY
+              });
+            }
+            const isUsernameExistInDb = await usersService.checkUsernameExist(value);
+            if (isUsernameExistInDb) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGE.VALIDATION.USERNAME_ALREADY_EXISTS,
+                status: HTTP_STATUS.UNPROCESSABLE_ENTITY
+              });
+            }
+          }
         }
       },
       avatar: imageSchema,
