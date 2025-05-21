@@ -16,6 +16,7 @@ import { MatchKeysAndValues } from 'mongodb';
 import { ErrorWithStatus } from '~/models/Errors';
 import { HTTP_STATUS } from '~/constants/http_request';
 import Follow from '~/models/schemas/Follow.schema';
+import axios from 'axios';
 dotenv.config();
 class users {
   /**
@@ -119,7 +120,7 @@ class users {
       verify: UserVerifyStatus.Unverified
       // Khi tạo user thì chưa verify email nên set verify là Unverified
     });
-
+    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token }));
     return { access_token, refresh_token };
   }
 
@@ -130,6 +131,85 @@ class users {
     });
     await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token }));
     return { access_token, refresh_token };
+  }
+
+  private async getOauthGoogleToken(code: string) {
+    const body = {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    };
+    const { data } = await axios.post('https://oauth2.googleapis.com/token', body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    return data as {
+      access_token: string;
+      id_token: string;
+    };
+  }
+
+  private async getOauthGoogleUserInfo(access_token: string, id_token: string) {
+    const { data } = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+      params: {
+        access_token,
+        alt: 'json'
+      },
+      headers: {
+        Authorization: `Bearer ${id_token}`
+      }
+    });
+    return data as {
+      id: string;
+      email: string;
+      verified_email: boolean;
+      name: string;
+      given_name: string;
+      family_name: string;
+      picture: string;
+      locale: string;
+    };
+  }
+
+  async oauth(code: string) {
+    const { access_token, id_token } = await this.getOauthGoogleToken(code);
+    const userInfo = await this.getOauthGoogleUserInfo(access_token, id_token);
+    if (!userInfo.verified_email) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGE.AUTH.GOOGLE_EMAIL_NOT_VERIFIED,
+        status: HTTP_STATUS.BAD_REQUEST
+      });
+    }
+
+    const user = await this.checkEmailExist(userInfo.email);
+    if (user) {
+      // User đã tồn tại -> login
+      const [access_token, refresh_token] = await this.sightAccessTokenAndRefreshToken({
+        user_id: user._id.toString(),
+        verify: UserVerifyStatus.Verified // đăng nhập bằng email nên set verify là Verified
+      });
+      // TODO: lưu refresh token vào database
+      await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id: user._id, refresh_token }));
+      return { access_token, refresh_token, is_new_user: false };
+    } else {
+      // User chưa tồn tại -> register
+      const password = Math.random().toString(36).substring(2, 15);
+      const newUser = await this.register({
+        email: userInfo.email,
+        password,
+        date_of_birth: new Date().toISOString(),
+        name: userInfo.name
+      });
+
+      return {
+        access_token: newUser.access_token,
+        refresh_token: newUser.refresh_token,
+        is_new_user: true
+      };
+    }
   }
 
   async checkEmailExist(email: string) {

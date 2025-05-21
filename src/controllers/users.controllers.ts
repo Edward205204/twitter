@@ -31,6 +31,14 @@ export const loginController = async (req: Request, res: Response, next: NextFun
   return;
 };
 
+export const oauthController = async (req: Request, res: Response) => {
+  const { code } = req.query;
+  const result = await usersService.oauth(code as string);
+  const redirectUrl = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&is_new_user=${result.is_new_user}`;
+  res.redirect(redirectUrl);
+  return;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterRequest>, res: Response) => {
   const result = await usersService.register(req.body);
