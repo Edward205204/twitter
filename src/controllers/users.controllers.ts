@@ -39,14 +39,12 @@ export const oauthController = async (req: Request, res: Response) => {
   return;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterRequest>, res: Response) => {
   const result = await usersService.register(req.body);
   res.json({ message: USER_MESSAGE.AUTH.REGISTER_SUCCESS, data: result });
   return;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.body;
   const result = await usersService.logout(refresh_token);
@@ -54,7 +52,6 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   return;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const verifyEmailTokenController = async (req: Request<ParamsDictionary, any, TokenPayload>, res: Response) => {
   const decoded_email_verify_token = req.decoded_email_verify_token as TokenPayload;
   const { user_id } = decoded_email_verify_token;
@@ -117,7 +114,6 @@ export const verifyForgotPasswordController = async (req: Request, res: Response
 };
 
 export const resetPasswordController = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
   res: Response
 ) => {
@@ -136,7 +132,6 @@ export const getMeController = async (req: Request, res: Response) => {
 };
 
 export const updateAccountController = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   req: Request<ParamsDictionary, any, UpdateAccountReqBody>,
   res: Response
 ) => {
@@ -154,7 +149,6 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
   return;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const followController = async (req: Request<ParamsDictionary, any, FollowReqBody>, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { followed_user_id } = req.body;
@@ -172,7 +166,6 @@ export const unfollowController = async (req: Request<UnfollowReqParams>, res: R
 };
 
 export const changePasswordController = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   req: Request<ParamsDictionary, any, ChangePasswordReqBody>,
   res: Response
 ) => {
