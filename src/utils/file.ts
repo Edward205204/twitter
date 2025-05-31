@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import formidable, { File } from 'formidable';
 import { NextFunction, Request, Response } from 'express';
 import { UPLOAD_TEMP_DIR } from '../constants/dir';
