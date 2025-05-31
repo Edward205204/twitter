@@ -3,7 +3,7 @@ import databaseService from '~/services/databases.services';
 import usersRouter from '~/routes/users.routes';
 import { defaultErrorHandler } from './middlewares/error.middlewares';
 import mediasRouter from './routes/medias.routes';
-import { initFolder } from './constants/file';
+import { initFolder } from './utils/file';
 const app = express();
 const PORT = 4000;
 

@@ -2,17 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import formidable, { File } from 'formidable';
 import { NextFunction, Request, Response } from 'express';
+import { UPLOAD_TEMP_DIR } from '../constants/dir';
 
 export const initFolder = () => {
-  const uploadFolderPath = path.resolve('uploads');
-  if (!fs.existsSync(uploadFolderPath)) {
-    fs.mkdirSync(uploadFolderPath, { recursive: true });
+  if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
+    fs.mkdirSync(UPLOAD_TEMP_DIR, { recursive: true });
   }
 };
 
 export const handleUploadSingleImage = async (req: Request, res: Response, next: NextFunction) => {
   const form = formidable({
-    uploadDir: path.resolve('uploads'),
+    uploadDir: UPLOAD_TEMP_DIR,
     maxFiles: 1,
     keepExtensions: true,
     maxFileSize: 300 * 1024, // 300kb
@@ -39,4 +39,9 @@ export const handleUploadSingleImage = async (req: Request, res: Response, next:
       resolve((files.image as File[])[0]);
     });
   });
+};
+
+export const getNameIgnoreExtension = (filename: string) => {
+  const file = filename.split('.');
+  return file.slice(0, -1).join('.');
 };
