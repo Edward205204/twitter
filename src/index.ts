@@ -5,6 +5,7 @@ import { defaultErrorHandler } from './middlewares/error.middlewares';
 import mediasRouter from './routes/medias.routes';
 import { initFolder } from './utils/file';
 import { config } from 'dotenv';
+import { UPLOAD_DIR } from './constants/dir';
 
 config();
 
@@ -16,6 +17,9 @@ initFolder();
 app.use(express.json());
 app.use('/users', usersRouter);
 app.use('/medias', mediasRouter);
+
+app.use('/static', express.static(UPLOAD_DIR));
+
 /**
  * * @description
  * - Chốt chặn cuối cùng của error handler, đây là nơi xử lý các lỗi không được bắt ở các middleware khác

@@ -17,8 +17,8 @@ class MediasServices {
     fs.unlinkSync(file.filepath);
     return {
       url: isDevelopment()
-        ? `http://localhost:${process.env.PORT}/medias/${newName}.jpg`
-        : `${process.env.HOST}/medias/${newName}.jpg`
+        ? `http://localhost:${process.env.PORT}/static/${newName}.jpg`
+        : `${process.env.HOST}/static/${newName}.jpg`
     };
   }
 }

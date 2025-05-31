@@ -17,7 +17,8 @@ export const USER_MESSAGE = {
     UNFOLLOWED_USER_SUCCESS: 'Unfollowed user success',
     NOT_FOLLOWED_THIS_USER: 'Not followed this user',
     CHANGE_PASSWORD_SUCCESS: 'Change password success',
-    GOOGLE_EMAIL_NOT_VERIFIED: 'Google email not verified'
+    GOOGLE_EMAIL_NOT_VERIFIED: 'Google email not verified',
+    UPLOAD_IMAGE_SUCCESS: 'Upload image success'
   },
 
   // Validation messages
