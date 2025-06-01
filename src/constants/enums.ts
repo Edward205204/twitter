@@ -5,3 +5,8 @@ export enum UserVerifyStatus {
 }
 //  Xác định giá trị để khi thay đổi thứ tự trong enum thì không bị ảnh hưởng đến giá trị trong db
 // Vì các value này được lưu trong db nên cần xác định giá trị cụ thể(nếu chỉ xử lý logic trong code thì không cần thiết)
+
+export enum MediaType {
+  Image,
+  Video
+}
