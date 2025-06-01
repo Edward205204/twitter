@@ -3,7 +3,6 @@ import { HTTP_STATUS } from '~/constants/http_request';
 import omit from 'lodash/omit';
 import { ErrorWithStatus } from '~/models/Errors';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const defaultErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof ErrorWithStatus) {
     res.status(err.status).json(omit(err, ['status']));

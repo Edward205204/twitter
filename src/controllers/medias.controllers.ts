@@ -21,6 +21,7 @@ export const serveStaticImageController = (req: Request, res: Response, next: Ne
   res.sendFile(filePath, (err) => {
     if (err) {
       res.status((err as any).status).json({ message: err.message });
+      return;
     }
   });
 };
@@ -29,9 +30,15 @@ export const serveStaticImageController = (req: Request, res: Response, next: Ne
 export const serveStaticVideoController = (req: Request, res: Response, next: NextFunction) => {
   const { name } = req.params;
   const filePath = path.resolve(UPLOAD_VIDEOS_DIR, name);
+
   res.sendFile(filePath, (err) => {
     if (err) {
-      res.status((err as any).status).json({ message: err.message });
+      // Nếu lỗi là 404, trả về 404, còn lỗi khác gọi next() để middleware xử lý
+      if ((err as any).status === 404) {
+        return res.status(404).json({ message: USER_MESSAGE.ERROR.FILE_NOT_FOUND });
+      }
+
+      return next(err);
     }
   });
 };

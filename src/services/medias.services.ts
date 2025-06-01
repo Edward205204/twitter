@@ -31,7 +31,6 @@ class MediasServices {
     return data;
   }
 
-  // cần handle
   async uploadVideo(req: Request, res: Response, next: NextFunction) {
     const files = await handleUploadVideo(req, res, next);
     const data: Media[] = await Promise.all(
