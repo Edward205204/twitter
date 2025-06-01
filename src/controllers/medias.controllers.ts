@@ -3,7 +3,9 @@ import path from 'path';
 import { UPLOAD_IMAGES_DIR, UPLOAD_VIDEOS_DIR } from '~/constants/dir';
 import { USER_MESSAGE } from '~/constants/user.message';
 import mediasServices from '~/services/medias.services';
+import fs from 'fs';
 
+import { HTTP_STATUS } from '~/constants/http_request';
 export const uploadImageController = async (req: Request, res: Response, next: NextFunction) => {
   const data = await mediasServices.uploadImage(req, res, next);
   res.json({ message: USER_MESSAGE.AUTH.UPLOAD_IMAGE_SUCCESS, data: data });
@@ -27,18 +29,30 @@ export const serveStaticImageController = (req: Request, res: Response, next: Ne
 };
 
 // hiển thị video
-export const serveStaticVideoController = (req: Request, res: Response, next: NextFunction) => {
+export const serveStaticVideoController = async (req: Request, res: Response, next: NextFunction) => {
+  const mime = await import('mime');
+
+  const { range } = req.headers;
+  if (!range) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGE.ERROR.RANGE_NOT_FOUND });
+  }
   const { name } = req.params;
-  const filePath = path.resolve(UPLOAD_VIDEOS_DIR, name);
+  const videoPath = path.resolve(UPLOAD_VIDEOS_DIR, name);
 
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      // Nếu lỗi là 404, trả về 404, còn lỗi khác gọi next() để middleware xử lý
-      if ((err as any).status === 404) {
-        return res.status(404).json({ message: USER_MESSAGE.ERROR.FILE_NOT_FOUND });
-      }
+  const videoSize = fs.statSync(videoPath).size;
+  const chunkSize = 10 ** 6; // 1MB
+  const start = Number(range.replace(/\D/g, ''));
+  const end = Math.min(start + chunkSize, videoSize - 1);
+  const contentLength = end - start + 1;
+  const contentType = mime.default.getType(videoPath) || 'video/*';
 
-      return next(err);
-    }
-  });
+  const headers = {
+    'Content-Range': `bytes ${start}-${end}/${videoSize}`,
+    'Accept-Ranges': 'bytes',
+    'Content-Type': contentType,
+    'Content-Length': contentLength
+  };
+  res.writeHead(HTTP_STATUS.PARTIAL_CONTENT, headers);
+  const videoStream = fs.createReadStream(videoPath, { start, end });
+  videoStream.pipe(res);
 };

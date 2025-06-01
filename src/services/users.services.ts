@@ -1,4 +1,3 @@
-import { verify } from 'jsonwebtoken';
 import User from '~/models/schemas/User.schema';
 import databaseService from './databases.services';
 import { RegisterRequest, UpdateAccountReqBody } from '~/models/schemas/requests/User.request';

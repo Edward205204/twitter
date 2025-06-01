@@ -3,6 +3,8 @@ import { serveStaticImageController, serveStaticVideoController } from '~/contro
 
 const staticRouter = Router();
 
-staticRouter.use('/images/:name', serveStaticImageController);
-staticRouter.use('/videos/:name', serveStaticVideoController);
+staticRouter.get('/images/:name', serveStaticImageController);
+staticRouter.get('/video-stream/:name', (req, res, next) => {
+  serveStaticVideoController(req, res, next);
+});
 export default staticRouter;
