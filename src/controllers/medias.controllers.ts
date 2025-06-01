@@ -32,6 +32,29 @@ export const serveStaticImageController = (req: Request, res: Response, next: Ne
   });
 };
 
+export const serveStatic_m3u8Controller = (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  const filePath = path.resolve(UPLOAD_VIDEOS_DIR, id, 'master.m3u8');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status((err as any).status).json({ message: err.message });
+      return;
+    }
+  });
+};
+
+export const serveStaticSegmentController = (req: Request, res: Response, next: NextFunction) => {
+  const { id, v, segment } = req.params;
+  const filePath = path.resolve(UPLOAD_VIDEOS_DIR, id, v, segment);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status((err as any).status).json({ message: err.message });
+      return;
+    }
+  });
+};
+
 // hiển thị video
 export const serveStaticVideoController = async (req: Request, res: Response, next: NextFunction) => {
   const mime = await import('mime');
@@ -41,7 +64,16 @@ export const serveStaticVideoController = async (req: Request, res: Response, ne
     return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGE.ERROR.RANGE_NOT_FOUND });
   }
   const { name } = req.params;
+
+  if (!name) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGE.ERROR.FILE_NOT_FOUND });
+  }
+
   const videoPath = path.resolve(UPLOAD_VIDEOS_DIR, name);
+
+  if (!fs.existsSync(videoPath)) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({ message: USER_MESSAGE.ERROR.FILE_NOT_FOUND });
+  }
 
   const videoSize = fs.statSync(videoPath).size;
   const chunkSize = 10 ** 6; // 1MB

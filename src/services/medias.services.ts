@@ -10,7 +10,6 @@ import { config } from 'dotenv';
 import { MediaType } from '~/constants/enums';
 import { Media } from '~/models/schemas/Other';
 import { encodeHLSWithMultipleVideoStreams } from '~/utils/video';
-import { USER_MESSAGE } from '~/constants/user.message';
 
 config();
 class MediasServices {
