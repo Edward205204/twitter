@@ -5,7 +5,7 @@ import { defaultErrorHandler } from './middlewares/error.middlewares';
 import mediasRouter from './routes/medias.routes';
 import { initFolder } from './utils/file';
 import { config } from 'dotenv';
-import { UPLOAD_DIR } from './constants/dir';
+import { UPLOAD_IMAGES_DIR } from './constants/dir';
 import staticRouter from './routes/static.routes';
 
 config();
@@ -19,7 +19,7 @@ app.use(express.json());
 app.use('/users', usersRouter);
 app.use('/medias', mediasRouter);
 app.use('/static', staticRouter);
-// app.use('/static', express.static(UPLOAD_DIR));
+// app.use('/static', express.static(UPLOAD_IMAGES_DIR));
 
 /**
  * * @description

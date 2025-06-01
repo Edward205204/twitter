@@ -1,17 +1,20 @@
 import fs from 'fs';
 import formidable, { File } from 'formidable';
 import { NextFunction, Request, Response } from 'express';
-import { UPLOAD_TEMP_DIR } from '../constants/dir';
+import { UPLOAD_IMAGES_TEMP_DIR, UPLOAD_VIDEOS_DIR } from '../constants/dir';
+import { getExtension } from './utils';
 
 export const initFolder = () => {
-  if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
-    fs.mkdirSync(UPLOAD_TEMP_DIR, { recursive: true });
-  }
+  [UPLOAD_IMAGES_TEMP_DIR, UPLOAD_VIDEOS_DIR].forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
 };
 
 export const handleUploadImage = async (req: Request, res: Response, next: NextFunction) => {
   const form = formidable({
-    uploadDir: UPLOAD_TEMP_DIR,
+    uploadDir: UPLOAD_IMAGES_TEMP_DIR,
     maxFiles: 4,
     keepExtensions: true,
     maxFileSize: 300 * 1024, // 300kb
@@ -41,7 +44,36 @@ export const handleUploadImage = async (req: Request, res: Response, next: NextF
   });
 };
 
-export const getNameIgnoreExtension = (filename: string) => {
-  const file = filename.split('.');
-  return file.slice(0, -1).join('.');
+export const handleUploadVideo = async (req: Request, res: Response, next: NextFunction) => {
+  const form = formidable({
+    uploadDir: UPLOAD_VIDEOS_DIR,
+    maxFiles: 1,
+    maxFileSize: 50 * 1024 * 1024, // 50mb
+    filter: function ({ name, originalFilename, mimetype }: formidable.Part): boolean {
+      return true;
+    }
+  });
+
+  return new Promise<File[]>((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        return reject(err);
+      }
+
+      // eslint-disable-next-line no-extra-boolean-cast
+      if (!Boolean(files.video)) {
+        return reject(new Error('File is empty'));
+      }
+
+      const videos = files.video as File[];
+
+      videos.forEach((video) => {
+        const ext = getExtension(video.originalFilename as string);
+        fs.renameSync(video.filepath, video.filepath + '.' + ext);
+        video.newFilename = video.newFilename + '.' + ext;
+      });
+
+      resolve(files.video as File[]);
+    });
+  });
 };
