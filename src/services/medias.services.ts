@@ -12,6 +12,50 @@ import { Media } from '~/models/schemas/Other';
 import { encodeHLSWithMultipleVideoStreams } from '~/utils/video';
 
 config();
+
+class Queue {
+  private items: string[];
+  private isEncoding: boolean;
+
+  constructor() {
+    this.items = [];
+    this.isEncoding = false;
+  }
+
+  enqueue(videoPath: string) {
+    this.items.push(videoPath);
+    this.processEncode();
+  }
+
+  async processEncode() {
+    if (this.isEncoding) return;
+    this.isEncoding = true;
+    if (this.items.length > 0) {
+      const videoItem = this.items[0];
+      try {
+        await encodeHLSWithMultipleVideoStreams(videoItem);
+      } catch (error) {
+        console.log('Encode file ', videoItem, ' error');
+        console.log('Error: ' + error);
+      }
+      // Xóa file gốc sau khi encode
+      fs.unlink(videoItem, (err) => {
+        if (err) {
+          console.log('Delete original file error after encode HLS: ' + err.message);
+        }
+      });
+
+      console.log('Encode file ', videoItem, ' successfully');
+      this.items.shift();
+      this.isEncoding = false;
+
+      this.processEncode();
+    }
+  }
+}
+
+const queue = new Queue();
+
 class MediasServices {
   async uploadImage(req: Request, res: Response, next: NextFunction) {
     const files = await handleUploadImage(req, res, next);
@@ -53,14 +97,14 @@ class MediasServices {
     const files = await handleUploadVideo(req, res, next);
     const data: Media[] = await Promise.all(
       files.map(async (file) => {
-        await encodeHLSWithMultipleVideoStreams(file.filepath);
+        queue.enqueue(file.filepath);
+        // await encodeHLSWithMultipleVideoStreams(file.filepath);
+        // fs.unlink(file.filepath, (err) => {
+        //   if (err) {
+        //     console.log('Delete original file error after encode HLS: ' + err.message);
+        //   }
+        // });
         const newFilename = getNameIgnoreExtension(file.newFilename);
-        fs.unlink(file.filepath, (err) => {
-          if (err) {
-            console.log('Delete original file error after encode HLS: ' + err.message);
-          }
-        });
-
         return {
           url: isDevelopment()
             ? `http://localhost:${process.env.PORT}/static/video-hls/${newFilename}`
