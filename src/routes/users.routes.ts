@@ -8,6 +8,7 @@ import {
   loginController,
   logoutController,
   oauthController,
+  refreshTokenController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
@@ -42,6 +43,9 @@ usersRouter.get('/oauth/google', wrapRequestHandler(oauthController));
 
 usersRouter.post('/register', registerValidator, wrapRequestHandler(registerController));
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidate, wrapRequestHandler(logoutController));
+
+usersRouter.post('/refresh-token', refreshTokenValidate, wrapRequestHandler(refreshTokenController));
+
 usersRouter.post('/verify-email', emailVerifyTokenValidator, wrapRequestHandler(verifyEmailTokenController));
 usersRouter.post('/resend-verify-email', accessTokenValidator, wrapRequestHandler(resendVerifyEmailController));
 usersRouter.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController));

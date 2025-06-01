@@ -12,6 +12,7 @@ mediasRouter.post(
   wrapRequestHandler(uploadImageController)
 );
 
+//  tạm thời bỏ accessTokenValidator và verifyStatusAccount để test
 mediasRouter.post(
   '/upload-video',
   // accessTokenValidator,

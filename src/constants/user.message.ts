@@ -19,7 +19,8 @@ export const USER_MESSAGE = {
     CHANGE_PASSWORD_SUCCESS: 'Change password success',
     GOOGLE_EMAIL_NOT_VERIFIED: 'Google email not verified',
     UPLOAD_IMAGE_SUCCESS: 'Upload image success',
-    UPLOAD_VIDEO_SUCCESS: 'Upload video success'
+    UPLOAD_VIDEO_SUCCESS: 'Upload video success',
+    REFRESH_TOKEN_SUCCESS: 'Refresh token success'
   },
 
   // Validation messages

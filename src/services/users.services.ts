@@ -225,6 +225,28 @@ class users {
     return { message: USER_MESSAGE.AUTH.LOGOUT_SUCCESS };
   }
 
+  async refreshTokenHandling({
+    refresh_token,
+    user_id,
+    verify
+  }: {
+    refresh_token: string;
+    user_id: string;
+    verify: UserVerifyStatus;
+  }) {
+    const [new_access_token, new_refresh_token] = await Promise.all([
+      this.accessToken({ user_id, verify }),
+      this.refreshToken({ user_id, verify }),
+      databaseService.refresh_tokens.deleteOne({ refresh_token })
+    ]);
+
+    await databaseService.refresh_tokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), refresh_token: new_refresh_token })
+    );
+
+    return { access_token: new_access_token, refresh_token: new_refresh_token };
+  }
+
   /**
    * @param user_id
    * @returns Promise<string>
