@@ -32,6 +32,23 @@ export const serveStaticImageController = (req: Request, res: Response, next: Ne
   });
 };
 
+export const getVideoEncodesStatusController = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  if (!id) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGE.ERROR.FILE_NOT_FOUND });
+    return;
+  }
+
+  if (!fs.existsSync(path.resolve(UPLOAD_VIDEOS_DIR, id))) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({ message: USER_MESSAGE.ERROR.FILE_NOT_FOUND });
+    return;
+  }
+
+  const data = await mediasServices.getVideoEncodesStatus(id);
+
+  res.json({ message: USER_MESSAGE.AUTH.GET_VIDEO_ENCODES_STATUS_SUCCESS, data: data });
+};
+
 export const serveStatic_m3u8Controller = (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 

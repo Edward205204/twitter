@@ -7,9 +7,11 @@ import fs from 'fs';
 import sharp from 'sharp';
 import { isDevelopment } from '~/utils/config';
 import { config } from 'dotenv';
-import { MediaType } from '~/constants/enums';
+import { MediaType, VideoEncodeStatus } from '~/constants/enums';
 import { Media } from '~/models/schemas/Other';
 import { encodeHLSWithMultipleVideoStreams } from '~/utils/video';
+import databaseService from './databases.services';
+import VideoEncode from '~/models/schemas/VideoEncodes.schema';
 
 config();
 
@@ -22,8 +24,10 @@ class Queue {
     this.isEncoding = false;
   }
 
-  enqueue(videoPath: string) {
+  async enqueue(videoPath: string) {
     this.items.push(videoPath);
+    const video_id = getNameIgnoreExtension(videoPath.split('/').pop() as string);
+    await databaseService.video_encodes.insertOne(new VideoEncode({ video_id, status: VideoEncodeStatus.Pending }));
     this.processEncode();
   }
 
@@ -32,23 +36,55 @@ class Queue {
     this.isEncoding = true;
     if (this.items.length > 0) {
       const videoItem = this.items[0];
+      const video_id = getNameIgnoreExtension(videoItem.split('/').pop() as string);
       try {
+        await databaseService.video_encodes.updateOne(
+          { video_id },
+          {
+            $set: { status: VideoEncodeStatus.Processing },
+            $currentDate: {
+              updated_at: true
+            }
+          }
+        );
         await encodeHLSWithMultipleVideoStreams(videoItem);
+
+        // Xóa file gốc sau khi encode
+        fs.unlink(videoItem, (err) => {
+          if (err) {
+            console.log('Delete original file error after encode HLS: ' + err.message);
+          }
+        });
+
+        this.items.shift();
+        console.log('Encode file ', videoItem, ' successfully');
+        await databaseService.video_encodes.updateOne(
+          { video_id },
+          {
+            $set: { status: VideoEncodeStatus.Success },
+            $currentDate: {
+              updated_at: true
+            }
+          }
+        );
       } catch (error) {
+        await databaseService.video_encodes
+          .updateOne(
+            { video_id },
+            {
+              $set: { status: VideoEncodeStatus.Failed, message: (error as Error)?.message },
+              $currentDate: {
+                updated_at: true
+              }
+            }
+          )
+          .catch((error) => {
+            console.log('Update status failed: ' + error);
+          });
         console.log('Encode file ', videoItem, ' error');
         console.log('Error: ' + error);
       }
-      // Xóa file gốc sau khi encode
-      fs.unlink(videoItem, (err) => {
-        if (err) {
-          console.log('Delete original file error after encode HLS: ' + err.message);
-        }
-      });
-
-      console.log('Encode file ', videoItem, ' successfully');
-      this.items.shift();
       this.isEncoding = false;
-
       this.processEncode();
     }
   }
@@ -97,13 +133,8 @@ class MediasServices {
     const files = await handleUploadVideo(req, res, next);
     const data: Media[] = await Promise.all(
       files.map(async (file) => {
-        queue.enqueue(file.filepath);
-        // await encodeHLSWithMultipleVideoStreams(file.filepath);
-        // fs.unlink(file.filepath, (err) => {
-        //   if (err) {
-        //     console.log('Delete original file error after encode HLS: ' + err.message);
-        //   }
-        // });
+        await queue.enqueue(file.filepath);
+
         const newFilename = getNameIgnoreExtension(file.newFilename);
         return {
           url: isDevelopment()
@@ -113,6 +144,12 @@ class MediasServices {
         };
       })
     );
+    return data;
+  }
+
+  async getVideoEncodesStatus(id: string) {
+    const data = await databaseService.video_encodes.findOne({ video_id: id });
+
     return data;
   }
 }

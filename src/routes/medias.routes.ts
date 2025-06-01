@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  getVideoEncodesStatusController,
   uploadImageController,
   uploadVideoController,
   uploadVideoHLSController
@@ -19,8 +20,8 @@ mediasRouter.post(
 //  tạm thời bỏ accessTokenValidator và verifyStatusAccount để test
 mediasRouter.post(
   '/upload-video',
-  // accessTokenValidator,
-  // verifyStatusAccount,
+  accessTokenValidator,
+  verifyStatusAccount,
   wrapRequestHandler(uploadVideoController)
 );
 
@@ -30,5 +31,7 @@ mediasRouter.post(
   // verifyStatusAccount,
   wrapRequestHandler(uploadVideoHLSController)
 );
+
+mediasRouter.get('/video-encodes-status/:id', wrapRequestHandler(getVideoEncodesStatusController));
 
 export default mediasRouter;

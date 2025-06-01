@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import User from '~/models/schemas/User.schema';
 import RefreshToken from '~/models/schemas/RefreshToken.schema';
 import Follow from '~/models/schemas/Follow.schema';
+import VideoEncode from '~/models/schemas/VideoEncodes.schema';
 dotenv.config();
 
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xbg5c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -44,6 +45,10 @@ class Databases {
 
   get follows(): Collection<Follow> {
     return this.db.collection(process.env.DB_FOLLOW_COLLECTION as string);
+  }
+
+  get video_encodes(): Collection<VideoEncode> {
+    return this.db.collection(process.env.DB_VIDEO_ENCODE_COLLECTION as string);
   }
 }
 

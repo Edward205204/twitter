@@ -20,7 +20,8 @@ export const USER_MESSAGE = {
     GOOGLE_EMAIL_NOT_VERIFIED: 'Google email not verified',
     UPLOAD_IMAGE_SUCCESS: 'Upload image success',
     UPLOAD_VIDEO_SUCCESS: 'Upload video success',
-    REFRESH_TOKEN_SUCCESS: 'Refresh token success'
+    REFRESH_TOKEN_SUCCESS: 'Refresh token success',
+    GET_VIDEO_ENCODES_STATUS_SUCCESS: 'Get video encodes status success'
   },
 
   // Validation messages
