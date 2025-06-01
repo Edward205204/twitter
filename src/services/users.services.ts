@@ -285,7 +285,7 @@ class users {
     // Khi gửi lại email verify tức là lúc này vẫn chưa verify email thành công
     const email_verify_token = await this.emailVerifyToken({ user_id, verify: UserVerifyStatus.Unverified });
     // TODO: gửi email_verify_token đến EMAIL người dùng, nhưng giờ chưa implement gửi email
-    console.log(email_verify_token);
+
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
       { $set: { email_verify_token }, $currentDate: { updated_at: true } }
@@ -300,7 +300,7 @@ class users {
       { $set: { forgot_password_token }, $currentDate: { updated_at: true } }
     );
     // TODO: Gửi email đến người dùng(chưa implement)
-    console.log('forgot_password_token', forgot_password_token);
+
     return { message: USER_MESSAGE.AUTH.SENDED_FORGOT_PASSWORD_TO_USER_EMAIL };
   }
 

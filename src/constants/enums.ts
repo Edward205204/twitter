@@ -8,5 +8,6 @@ export enum UserVerifyStatus {
 
 export enum MediaType {
   Image,
-  Video
+  Video,
+  HLS
 }

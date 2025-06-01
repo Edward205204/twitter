@@ -16,6 +16,10 @@ export const uploadVideoController = async (req: Request, res: Response, next: N
   res.json({ message: USER_MESSAGE.AUTH.UPLOAD_VIDEO_SUCCESS, data: data });
 };
 
+export const uploadVideoHLSController = async (req: Request, res: Response, next: NextFunction) => {
+  const data = await mediasServices.uploadVideoHLS(req, res, next);
+  res.json({ message: USER_MESSAGE.AUTH.UPLOAD_VIDEO_SUCCESS, data: data });
+};
 // hiển thị ảnh
 export const serveStaticImageController = (req: Request, res: Response, next: NextFunction) => {
   const { name } = req.params;

@@ -85,6 +85,7 @@ export const USER_MESSAGE = {
     FAIL_TO_INSERT_USER: 'Failed to insert user into database',
     USER_NOT_FOUND: 'User not found',
     FILE_NOT_FOUND: 'File not found',
-    RANGE_NOT_FOUND: 'Range not found'
+    RANGE_NOT_FOUND: 'Range not found',
+    SOMETHING_WENT_WRONG: 'Oops! Something went wrong from server'
   }
 } as const;

@@ -9,6 +9,8 @@ import { isDevelopment } from '~/utils/config';
 import { config } from 'dotenv';
 import { MediaType } from '~/constants/enums';
 import { Media } from '~/models/schemas/Other';
+import { encodeHLSWithMultipleVideoStreams } from '~/utils/video';
+import { USER_MESSAGE } from '~/constants/user.message';
 
 config();
 class MediasServices {
@@ -42,6 +44,29 @@ class MediasServices {
             ? `http://localhost:${process.env.PORT}/static/videos/${newFilename}`
             : `${process.env.HOST}/static/videos/${newFilename}`,
           type: MediaType.Video
+        };
+      })
+    );
+    return data;
+  }
+
+  async uploadVideoHLS(req: Request, res: Response, next: NextFunction) {
+    const files = await handleUploadVideo(req, res, next);
+    const data: Media[] = await Promise.all(
+      files.map(async (file) => {
+        await encodeHLSWithMultipleVideoStreams(file.filepath);
+        const newFilename = getNameIgnoreExtension(file.newFilename);
+        fs.unlink(file.filepath, (err) => {
+          if (err) {
+            console.log('Delete original file error after encode HLS: ' + err.message);
+          }
+        });
+
+        return {
+          url: isDevelopment()
+            ? `http://localhost:${process.env.PORT}/static/video-hls/${newFilename}`
+            : `${process.env.HOST}/static/video-hls/${newFilename}`,
+          type: MediaType.HLS
         };
       })
     );

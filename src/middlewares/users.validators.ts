@@ -116,7 +116,7 @@ const forgotPasswordTokenSchema: ParamSchema = {
           token: value,
           secretOrPublicKey: process.env.JWT_SECRET_KEY_FORGOT_PASSWORD_TOKEN as string
         });
-        console.log(decoded_forgot_password_token);
+
         const { user_id } = decoded_forgot_password_token;
         const user = await databaseService.users.findOne({ _id: new ObjectId(user_id as string) });
         if (!user) {
