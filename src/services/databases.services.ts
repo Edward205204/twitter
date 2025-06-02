@@ -28,6 +28,37 @@ class Databases {
       throw error;
     }
   }
+
+  async indexUsers() {
+    const isExist = await this.users.indexExists(['username_1', 'email_1']);
+
+    if (isExist) return;
+    this.users.createIndex({ username: 1 }, { unique: true });
+    this.users.createIndex({ email: 1 }, { unique: true });
+  }
+
+  async indexRefreshTokens() {
+    const isExist = await this.refresh_tokens.indexExists(['refresh_token_1', 'exp_1']);
+
+    if (isExist) return;
+    this.refresh_tokens.createIndex({ refresh_token: 1 });
+    this.refresh_tokens.createIndex({ exp: 1 }, { expireAfterSeconds: 0 });
+  }
+
+  async indexFollows() {
+    const isExist = await this.follows.indexExists(['user_id_1_followed_user_id_1']);
+
+    if (isExist) return;
+    this.follows.createIndex({ user_id: 1, followed_user_id: 1 }, { unique: true });
+  }
+
+  async indexVideoEncodes() {
+    const isExist = await this.video_encodes.indexExists(['video_id_1']);
+
+    if (isExist) return;
+    this.video_encodes.createIndex({ video_id: 1 }, { unique: true });
+  }
+
   // các method get dùng để gọi các collection khác nhau trong cùng 1 database
   // mỗi collection sẽ có 1 schema riêng nhưng chỉ cần get 1 lần ở đây vì chung db
 
@@ -39,14 +70,26 @@ class Databases {
     return this.db.collection(process.env.DB_USER_COLLECTION as string);
   }
 
+  /**
+   * @description Lấy collection refresh_tokens từ database, có thể dùng với insertOne, find, update, delete
+   * @returns {Collection<RefreshToken>}  Trả về collection refresh_tokens
+   */
   get refresh_tokens(): Collection<RefreshToken> {
     return this.db.collection(process.env.DB_REFRESH_TOKEN_COLLECTION as string);
   }
 
+  /**
+   * @description Lấy collection follows từ database, có thể dùng với insertOne, find, update, delete
+   * @returns {Collection<Follow>}  Trả về collection follows
+   */
   get follows(): Collection<Follow> {
     return this.db.collection(process.env.DB_FOLLOW_COLLECTION as string);
   }
 
+  /**
+   * @description Lấy collection video_encodes từ database, có thể dùng với insertOne, find, update, delete
+   * @returns {Collection<VideoEncode>}  Trả về collection video_encodes
+   */
   get video_encodes(): Collection<VideoEncode> {
     return this.db.collection(process.env.DB_VIDEO_ENCODE_COLLECTION as string);
   }

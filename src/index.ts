@@ -30,7 +30,15 @@ app.use('/static/videos', express.static(UPLOAD_VIDEOS_DIR));
  */
 app.use(defaultErrorHandler);
 
-databaseService.connect().catch(console.dir);
+databaseService
+  .connect()
+  .then(() => {
+    databaseService.indexUsers();
+    databaseService.indexRefreshTokens();
+    databaseService.indexFollows();
+    databaseService.indexVideoEncodes();
+  })
+  .catch(console.dir);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
