@@ -3,7 +3,7 @@ import databaseService from './databases.services';
 import { RegisterRequest, UpdateAccountReqBody } from '~/models/schemas/requests/User.request';
 import dotenv from 'dotenv';
 import { hashPassword } from '~/utils/crypto';
-import { signToken } from '~/utils/jwt';
+import { signToken, verifyToken } from '~/utils/jwt';
 import { TokenType } from '~/constants/token_type';
 import { ObjectId } from 'mongodb';
 import RefreshToken from '~/models/schemas/RefreshToken.schema';
@@ -44,6 +44,13 @@ class users {
     });
   }
 
+  decodeRefreshToken(refresh_token: string) {
+    return verifyToken({
+      token: refresh_token,
+      secretOrPublicKey: process.env.JWT_SECRET_KEY_REFRESH_TOKEN as string
+    });
+  }
+
   /**
    * @param user_id
    * @returns Promise<string>
@@ -54,7 +61,22 @@ class users {
    * - Token will be signed with RS256 algorithm
    * - Token will be signed with JWT_SECRET_KEY
    */
-  private async refreshToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }): Promise<string> {
+  private async refreshToken({
+    user_id,
+    verify,
+    exp
+  }: {
+    user_id: string;
+    verify: UserVerifyStatus;
+    exp?: number;
+  }): Promise<string> {
+    // Nếu exp không được truyền vào thì sẽ dùng thời gian mặc định là REFRESH_TOKEN_EXPIRATION_TIME, nếu có thì dùng exp được truyền vào(dùng cho việc refresh token)
+    if (exp) {
+      return await signToken({
+        secretOrPrivateKey: process.env.JWT_SECRET_KEY_REFRESH_TOKEN as string,
+        payload: { user_id, token_type: TokenType.RefreshToken, verify, exp }
+      });
+    }
     return await signToken({
       secretOrPrivateKey: process.env.JWT_SECRET_KEY_REFRESH_TOKEN as string,
       payload: { user_id, token_type: TokenType.RefreshToken, verify },
@@ -98,6 +120,8 @@ class users {
       // Khi tạo user thì chưa verify email nên set verify là Unverified
     ]);
 
+    console.log('email_verify_token', email_verify_token);
+
     const result = await databaseService.users.insertOne(
       new User({
         ...value,
@@ -119,7 +143,8 @@ class users {
       verify: UserVerifyStatus.Unverified
       // Khi tạo user thì chưa verify email nên set verify là Unverified
     });
-    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token }));
+    const { exp, iat } = await this.decodeRefreshToken(refresh_token);
+    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token, exp, iat }));
     return { access_token, refresh_token };
   }
 
@@ -128,7 +153,8 @@ class users {
       user_id: user_id.toString(),
       verify
     });
-    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token }));
+    const { exp, iat } = await this.decodeRefreshToken(refresh_token);
+    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id, refresh_token, exp, iat }));
     return { access_token, refresh_token };
   }
 
@@ -191,7 +217,8 @@ class users {
         verify: UserVerifyStatus.Verified // đăng nhập bằng email nên set verify là Verified
       });
       // TODO: lưu refresh token vào database
-      await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id: user._id, refresh_token }));
+      const { exp, iat } = await this.decodeRefreshToken(refresh_token);
+      await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id: user._id, refresh_token, exp, iat }));
       return { access_token, refresh_token, is_new_user: false };
     } else {
       // User chưa tồn tại -> register
@@ -228,20 +255,29 @@ class users {
   async refreshTokenHandling({
     refresh_token,
     user_id,
-    verify
+    verify,
+    exp
   }: {
     refresh_token: string;
     user_id: string;
     verify: UserVerifyStatus;
+    exp: number;
   }) {
     const [new_access_token, new_refresh_token] = await Promise.all([
       this.accessToken({ user_id, verify }),
-      this.refreshToken({ user_id, verify }),
+      this.refreshToken({ user_id, verify, exp }),
       databaseService.refresh_tokens.deleteOne({ refresh_token })
     ]);
 
+    const decoded_refresh_token = await this.decodeRefreshToken(new_refresh_token);
+
     await databaseService.refresh_tokens.insertOne(
-      new RefreshToken({ user_id: new ObjectId(user_id), refresh_token: new_refresh_token })
+      new RefreshToken({
+        user_id: new ObjectId(user_id),
+        refresh_token: new_refresh_token,
+        exp: decoded_refresh_token.exp,
+        iat: decoded_refresh_token.iat
+      })
     );
 
     return { access_token: new_access_token, refresh_token: new_refresh_token };
@@ -276,7 +312,10 @@ class users {
         }
       )
     ]);
-    await databaseService.refresh_tokens.insertOne(new RefreshToken({ user_id: new ObjectId(user_id), refresh_token }));
+    const { exp, iat } = await this.decodeRefreshToken(refresh_token);
+    await databaseService.refresh_tokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), refresh_token, exp, iat })
+    );
 
     return { access_token, refresh_token };
   }
@@ -286,6 +325,7 @@ class users {
     const email_verify_token = await this.emailVerifyToken({ user_id, verify: UserVerifyStatus.Unverified });
     // TODO: gửi email_verify_token đến EMAIL người dùng, nhưng giờ chưa implement gửi email
 
+    console.log('email_verify_token', email_verify_token);
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
       { $set: { email_verify_token }, $currentDate: { updated_at: true } }

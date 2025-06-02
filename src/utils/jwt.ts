@@ -6,7 +6,7 @@ dotenv.config();
 export const signToken = ({
   payload,
   secretOrPrivateKey,
-  option = { algorithm: 'RS256' }
+  option = { algorithm: 'HS256' }
 }: {
   payload: string | Buffer | object;
   secretOrPrivateKey: string;

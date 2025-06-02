@@ -27,8 +27,8 @@ mediasRouter.post(
 
 mediasRouter.post(
   '/upload-video-hls',
-  // accessTokenValidator,
-  // verifyStatusAccount,
+  accessTokenValidator,
+  verifyStatusAccount,
   wrapRequestHandler(uploadVideoHLSController)
 );
 
