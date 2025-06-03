@@ -1,7 +1,20 @@
-import { NextFunction, Request, Response } from 'express';
+import { TokenPayload } from './../models/schemas/requests/User.request';
+import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
+import { TWEETS_MESSAGES } from '~/constants/tweet.mesage';
 import { TweetRequestBody } from '~/models/schemas/requests/Tweet.request';
+import tweetsService from '~/services/tweets.services';
+
 export const createTweetController = async (req: Request<ParamsDictionary, any, TweetRequestBody>, res: Response) => {
-  res.send('createTweetController');
+  const body = req.body as TweetRequestBody;
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const data = await tweetsService.createTweet({
+    body,
+    user_id
+  });
+  res.json({
+    message: TWEETS_MESSAGES.SUCCESS.CREATE_TWEET_SUCCESS,
+    data
+  });
   return;
 };

@@ -1,4 +1,7 @@
 export const TWEETS_MESSAGES = {
+  SUCCESS: {
+    CREATE_TWEET_SUCCESS: 'Create tweet successfully'
+  },
   VALIDATION: {
     INVALID_TYPE: 'Type is invalid',
     INVALID_AUDIENCE: 'Audience is invalid',

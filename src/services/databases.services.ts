@@ -6,6 +6,8 @@ import User from '~/models/schemas/User.schema';
 import RefreshToken from '~/models/schemas/RefreshToken.schema';
 import Follow from '~/models/schemas/Follow.schema';
 import VideoEncode from '~/models/schemas/VideoEncodes.schema';
+import Tweet from '~/models/schemas/Tweets.schema';
+import HashTag from '~/models/schemas/HashTags.schema';
 dotenv.config();
 
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xbg5c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -92,6 +94,14 @@ class Databases {
    */
   get video_encodes(): Collection<VideoEncode> {
     return this.db.collection(process.env.DB_VIDEO_ENCODE_COLLECTION as string);
+  }
+
+  get tweets(): Collection<Tweet> {
+    return this.db.collection(process.env.DB_TWEET_COLLECTION as string);
+  }
+
+  get hashtags(): Collection<HashTag> {
+    return this.db.collection(process.env.DB_HASHTAG_COLLECTION as string);
   }
 }
 
