@@ -4,8 +4,8 @@ import { UPLOAD_IMAGES_DIR, UPLOAD_VIDEOS_DIR } from '~/constants/dir';
 import { USER_MESSAGE } from '~/constants/user.message';
 import mediasServices from '~/services/medias.services';
 import fs from 'fs';
-
 import { HTTP_STATUS } from '~/constants/http_request';
+
 export const uploadImageController = async (req: Request, res: Response, next: NextFunction) => {
   const data = await mediasServices.uploadImage(req, res, next);
   res.json({ message: USER_MESSAGE.AUTH.UPLOAD_IMAGE_SUCCESS, data: data });
