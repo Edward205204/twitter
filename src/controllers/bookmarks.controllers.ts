@@ -15,3 +15,18 @@ export const createBookmarkController = async (
 
   res.json({ message: BOOKMARK_MESSAGE.SUCCESS.CREATE_BOOKMARK_SUCCESS, data });
 };
+
+export const deleteBookmarkController = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const { tweet_id } = req.params;
+  await bookmarksService.deleteBookmarkByFilter(user_id, { tweet_id });
+
+  res.json({ message: BOOKMARK_MESSAGE.SUCCESS.DELETE_BOOKMARK_SUCCESS });
+};
+
+export const deleteBookmarkControllerByBookmarkId = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const { bookmark_id } = req.params;
+  await bookmarksService.deleteBookmarkByFilter(user_id, { _id: bookmark_id });
+  res.json({ message: BOOKMARK_MESSAGE.SUCCESS.DELETE_BOOKMARK_SUCCESS });
+};
