@@ -1,6 +1,7 @@
 export const TWEETS_MESSAGES = {
   SUCCESS: {
-    CREATE_TWEET_SUCCESS: 'Create tweet successfully'
+    CREATE_TWEET_SUCCESS: 'Create tweet successfully',
+    GET_TWEET_SUCCESS: 'Get tweet successfully'
   },
   VALIDATION: {
     TWEET_ID_IS_INVALID: 'Tweet id is invalid',

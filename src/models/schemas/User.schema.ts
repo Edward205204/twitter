@@ -19,12 +19,14 @@ interface TypeOfUser {
   avatar?: string;
   cover_photo?: string;
   salt: string;
+  tweet_circle?: ObjectId[];
 }
 
 export default class User {
   _id?: ObjectId;
   name: string;
   email: string;
+  tweet_circle: ObjectId[];
   date_of_birth: Date;
   password: string;
   created_at?: Date;
@@ -43,6 +45,7 @@ export default class User {
     this._id = user._id;
     this.salt = user.salt;
     this.name = user.name || '';
+    this.tweet_circle = user.tweet_circle || [];
     this.email = user.email;
     this.password = user.password;
     this.date_of_birth = user.date_of_birth || new Date();

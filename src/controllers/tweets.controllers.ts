@@ -18,3 +18,13 @@ export const createTweetController = async (req: Request<ParamsDictionary, any, 
   });
   return;
 };
+
+export const getTweetController = async (req: Request, res: Response) => {
+  const { tweet_id } = req.params;
+
+  res.json({
+    message: TWEETS_MESSAGES.SUCCESS.GET_TWEET_SUCCESS,
+    data: tweet_id
+  });
+  return;
+};
