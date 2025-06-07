@@ -13,7 +13,6 @@ import { ObjectId } from 'mongodb';
 import User from '~/models/schemas/User.schema';
 import { UserVerifyStatus } from '~/constants/enums';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { isLength } from 'lodash';
 import { TokenPayload } from '~/models/schemas/requests/User.request';
 import { USER_NAME_REGEX } from '~/constants/regex';
 
@@ -514,7 +513,7 @@ export const changePasswordValidator = validate(
 export const isUserLoggedInValidator = (middleware: RequestHandler) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.headers.authorization) {
-      middleware(req, res, next);
+      return middleware(req, res, next);
     }
     next();
   };

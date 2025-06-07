@@ -1,14 +1,18 @@
 import { checkSchema } from 'express-validator';
 import { validate } from '~/utils/validate';
 import { enumsToArray } from '~/utils/common';
-import { MediaType, TweetAudience, TweetType } from '~/constants/enums';
+import { MediaType, TweetAudience, TweetType, UserVerifyStatus } from '~/constants/enums';
 
 import { ObjectId } from 'mongodb';
-import { TWEETS_MESSAGES } from '~/constants/tweet.mesage';
+import { TWEETS_MESSAGES } from '~/constants/tweet.message';
 import { isEmpty } from 'lodash';
 import { HTTP_STATUS } from '~/constants/http_request';
 import { ErrorWithStatus } from '~/models/Errors';
 import databaseService from '~/services/databases.services';
+import { NextFunction, Request, Response } from 'express';
+import Tweet from '~/models/schemas/Tweets.schema';
+import { TokenPayload } from '~/models/schemas/requests/User.request';
+import { wrapRequestHandler } from '~/utils/handlers';
 
 // const typeArray = enumsToArray(TweetType);
 // const audienceArray = enumsToArray(TweetAudience);
@@ -185,6 +189,7 @@ export const tweetIdValidator = validate(
                 message: TWEETS_MESSAGES.VALIDATION.TWEET_ID_NOT_FOUND
               });
             }
+            (req as Request).tweet = isExist;
             return true;
           }
         }
@@ -193,3 +198,48 @@ export const tweetIdValidator = validate(
     ['body', 'params']
   )
 );
+
+export const audienceValidator = wrapRequestHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const tweet = req.tweet as Tweet;
+
+  if (tweet.audience === TweetAudience.TwitterCircle) {
+    console.log('tweet_circle');
+    const author_id = tweet.user_id;
+    const user_id = (req.decoded_authorization as TokenPayload).user_id;
+
+    const [user, author] = await Promise.all([
+      databaseService.users.findOne({
+        _id: new ObjectId(user_id)
+      }),
+      databaseService.users.findOne({
+        _id: new ObjectId(author_id)
+      })
+    ]);
+
+    if (!user || !author) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: TWEETS_MESSAGES.VALIDATION.USER_NOT_FOUND
+      });
+    }
+
+    if (author.verify === UserVerifyStatus.Banned) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: TWEETS_MESSAGES.VALIDATION.USER_BANNED
+      });
+    }
+
+    const isInAudientCircle = author.tweet_circle.some((tweet_circle_id) => {
+      return tweet_circle_id.equals(user._id);
+    });
+
+    if (!isInAudientCircle && !user._id.equals(author._id)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: TWEETS_MESSAGES.VALIDATION.CAN_NOT_ACCESS_TWEET
+      });
+    }
+  }
+  next();
+});

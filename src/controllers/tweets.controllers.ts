@@ -1,7 +1,7 @@
 import { TokenPayload } from './../models/schemas/requests/User.request';
 import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
-import { TWEETS_MESSAGES } from '~/constants/tweet.mesage';
+import { TWEETS_MESSAGES } from '~/constants/tweet.message';
 import { TweetRequestBody } from '~/models/schemas/requests/Tweet.request';
 import tweetsService from '~/services/tweets.services';
 
