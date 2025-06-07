@@ -6,6 +6,9 @@ import { MediaType, TweetAudience, TweetType } from '~/constants/enums';
 import { ObjectId } from 'mongodb';
 import { TWEETS_MESSAGES } from '~/constants/tweet.mesage';
 import { isEmpty } from 'lodash';
+import { HTTP_STATUS } from '~/constants/http_request';
+import { ErrorWithStatus } from '~/models/Errors';
+import databaseService from '~/services/databases.services';
 
 // const typeArray = enumsToArray(TweetType);
 // const audienceArray = enumsToArray(TweetAudience);
@@ -157,4 +160,36 @@ export const createTweetValidator = validate(
       }
     }
   })
+);
+
+export const tweetIdValidator = validate(
+  checkSchema(
+    {
+      tweet_id: {
+        custom: {
+          options: async (value, { req }) => {
+            if (!ObjectId.isValid(value)) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.BAD_REQUEST,
+                message: TWEETS_MESSAGES.VALIDATION.TWEET_ID_IS_INVALID
+              });
+            }
+
+            const isExist = await databaseService.tweets.findOne({
+              _id: new ObjectId(value as string)
+            });
+
+            if (!isExist) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.NOT_FOUND,
+                message: TWEETS_MESSAGES.VALIDATION.TWEET_ID_NOT_FOUND
+              });
+            }
+            return true;
+          }
+        }
+      }
+    },
+    ['body', 'params']
+  )
 );

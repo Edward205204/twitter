@@ -4,13 +4,26 @@ import {
   deleteBookmarkController,
   deleteBookmarkControllerByBookmarkId
 } from '~/controllers/bookmarks.controllers';
-import { accessTokenValidator } from '~/middlewares/users.validators';
+import { tweetIdValidator } from '~/middlewares/tweets.middlewares';
+import { accessTokenValidator, verifyStatusAccount } from '~/middlewares/users.validators';
 import { wrapRequestHandler } from '~/utils/handlers';
 
 const bookmarksRouter = Router();
 
 bookmarksRouter.post('/', accessTokenValidator, wrapRequestHandler(createBookmarkController));
-bookmarksRouter.delete('/tweets/:tweet_id', accessTokenValidator, wrapRequestHandler(deleteBookmarkController));
-bookmarksRouter.delete('/:bookmark_id', accessTokenValidator, wrapRequestHandler(deleteBookmarkControllerByBookmarkId));
+bookmarksRouter.delete(
+  '/tweets/:tweet_id',
+  accessTokenValidator,
+  verifyStatusAccount,
+  tweetIdValidator,
+  wrapRequestHandler(deleteBookmarkController)
+);
+bookmarksRouter.delete(
+  '/:bookmark_id',
+  accessTokenValidator,
+  verifyStatusAccount,
+  tweetIdValidator,
+  wrapRequestHandler(deleteBookmarkControllerByBookmarkId)
+);
 
 export default bookmarksRouter;
