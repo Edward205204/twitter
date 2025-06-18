@@ -3,7 +3,7 @@ import HashTag from '~/models/schemas/HashTags.schema';
 import { TweetRequestBody } from '~/models/schemas/requests/Tweet.request';
 import databaseService from './databases.services';
 import Tweet from '~/models/schemas/Tweets.schema';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 
 class TweetsService {
   async checkAndCreateHashTag(hashtags: string[]) {
@@ -39,6 +39,30 @@ class TweetsService {
 
     const result = await databaseService.tweets.findOne({ _id: res.insertedId });
     return result;
+  }
+
+  async increaseView(tweet_id: string, user_id?: string) {
+    const inc = user_id ? { user_views: 1 } : { guest_views: 1 };
+    const tweet = await databaseService.tweets.findOneAndUpdate(
+      { _id: new ObjectId(tweet_id) },
+      {
+        $inc: inc,
+        $currentDate: {
+          updated_at: true
+        }
+      },
+      {
+        returnDocument: 'after',
+        projection: {
+          guest_views: 1,
+          user_views: 1
+        }
+      }
+    );
+    return tweet as WithId<{
+      guest_views: number;
+      user_views: number;
+    }>;
   }
 }
 
