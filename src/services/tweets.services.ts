@@ -4,6 +4,7 @@ import { TweetRequestBody } from '~/models/schemas/requests/Tweet.request';
 import databaseService from './databases.services';
 import Tweet from '~/models/schemas/Tweets.schema';
 import { ObjectId, WithId } from 'mongodb';
+import { TweetType } from '~/constants/enums';
 
 class TweetsService {
   async checkAndCreateHashTag(hashtags: string[]) {
@@ -28,7 +29,7 @@ class TweetsService {
       new Tweet({
         user_id: new ObjectId(user_id),
         parent_id: body.parent_id,
-        mentions: [],
+        mentions: [...body.mentions],
         audience: body.audience,
         type: body.type,
         hashtags: hashtags,
@@ -63,6 +64,133 @@ class TweetsService {
       guest_views: number;
       user_views: number;
     }>;
+  }
+
+  async getTweetChildren({
+    tweet_id,
+    tweet_type,
+    tweet_limit,
+    tweet_page
+  }: {
+    tweet_id: string;
+    tweet_type: TweetType;
+    tweet_limit: number;
+    tweet_page: number;
+  }) {
+    const tweet = await databaseService.tweets
+      .aggregate([
+        {
+          $match: {
+            type: tweet_type,
+            parent_id: new ObjectId(tweet_id)
+          }
+        },
+        {
+          $lookup: {
+            from: 'hashtags',
+            localField: 'hashtags',
+            foreignField: '_id',
+            as: 'hashtags'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'mentions',
+            foreignField: '_id',
+            as: 'mentions'
+          }
+        },
+        {
+          $addFields: {
+            mentions: {
+              $map: {
+                input: '$mentions',
+                as: 'mention',
+                in: {
+                  _id: '$$mention._id',
+                  name: '$$mention.name',
+                  username: '$$mention.username',
+                  email: '$$mention.email'
+                }
+              }
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'bookmarks',
+            localField: '_id',
+            foreignField: 'tweet_id',
+            as: 'bookmarks'
+          }
+        },
+        {
+          $lookup: {
+            from: 'likes',
+            localField: '_id',
+            foreignField: 'tweet_id',
+            as: 'likes'
+          }
+        },
+        {
+          $lookup: {
+            from: 'tweets',
+            localField: '_id',
+            foreignField: 'parent_id',
+            as: 'tweet_children'
+          }
+        },
+        {
+          $addFields: {
+            bookmarks: {
+              $size: '$bookmarks'
+            },
+            likes: {
+              $size: '$likes'
+            },
+            comment_count: {
+              $size: {
+                $filter: {
+                  input: '$tweet_children',
+                  as: 'item',
+                  cond: {
+                    $eq: ['$$item.type', TweetType.Comment]
+                  }
+                }
+              }
+            },
+            quote_count: {
+              $size: {
+                $filter: {
+                  input: '$tweet_children',
+                  as: 'item',
+                  cond: {
+                    $eq: ['$$item.type', TweetType.QuoteTweet]
+                  }
+                }
+              }
+            },
+            views: {
+              $add: ['$user_views', '$guest_views']
+            }
+          }
+        },
+        {
+          $project: {
+            tweet_children: 0
+          }
+        },
+        {
+          $skip: (tweet_page - 1) * tweet_limit
+        },
+        {
+          $limit: tweet_limit
+        }
+      ])
+      .toArray();
+
+    return tweet;
   }
 }
 

@@ -1,6 +1,7 @@
 import { TokenPayload } from './../models/schemas/requests/User.request';
 import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
+import { TweetType } from '~/constants/enums';
 import { TWEETS_MESSAGES } from '~/constants/tweet.message';
 import { TweetRequestBody } from '~/models/schemas/requests/Tweet.request';
 import Tweet from '~/models/schemas/Tweets.schema';
@@ -29,6 +30,26 @@ export const getTweetController = async (req: Request, res: Response) => {
   res.json({
     message: TWEETS_MESSAGES.SUCCESS.GET_TWEET_SUCCESS,
     data: tweet
+  });
+  return;
+};
+
+export const getTweetChildrenController = async (req: Request, res: Response) => {
+  const tweet_id = req.params.tweet_id;
+  const tweet_type = Number(req.query.type) as TweetType;
+  const tweet_limit = Number(req.query.limit) || 10;
+  const tweet_page = Number(req.query.page) || 1;
+
+  const result = await tweetsService.getTweetChildren({
+    tweet_id,
+    tweet_type,
+    tweet_limit,
+    tweet_page
+  });
+
+  res.json({
+    message: TWEETS_MESSAGES.SUCCESS.GET_TWEET_CHILDREN_SUCCESS,
+    data: result
   });
   return;
 };
