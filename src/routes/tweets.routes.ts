@@ -6,7 +6,12 @@ import {
   getTweetChildrenController,
   getTweetController
 } from '~/controllers/tweets.controllers';
-import { audienceValidator, createTweetValidator, tweetIdValidator } from '~/middlewares/tweets.middlewares';
+import {
+  audienceValidator,
+  createTweetValidator,
+  getTweetChildrenValidator,
+  tweetIdValidator
+} from '~/middlewares/tweets.middlewares';
 const tweetsRouter = Router();
 
 tweetsRouter.post(
@@ -32,6 +37,7 @@ tweetsRouter.get(
   isUserLoggedInValidator(verifyStatusAccount),
   tweetIdValidator,
   audienceValidator,
+  getTweetChildrenValidator,
   wrapRequestHandler(getTweetChildrenController)
 );
 

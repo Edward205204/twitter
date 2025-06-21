@@ -20,6 +20,10 @@ export const TWEETS_MESSAGES = {
     TWEET_ID_NOT_FOUND: 'Tweet not found',
     USER_NOT_FOUND: 'User not found',
     USER_BANNED: 'User banned',
-    CAN_NOT_ACCESS_TWEET: 'Can not access tweet'
+    CAN_NOT_ACCESS_TWEET: 'Can not access tweet',
+    LIMIT_MUST_BE_A_NUMBER: 'Limit must be a number',
+    PAGE_MUST_BE_A_NUMBER: 'Page must be a number',
+    LIMIT_NOT_VALID: 'Limit must be between 1 and 100',
+    PAGE_NOT_VALID: 'Page must be greater than 0'
   }
 };

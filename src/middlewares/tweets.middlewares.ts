@@ -353,3 +353,49 @@ export const audienceValidator = wrapRequestHandler(async (req: Request, res: Re
   }
   next();
 });
+
+export const getTweetChildrenValidator = validate(
+  checkSchema(
+    {
+      type: {
+        isIn: {
+          options: [tweetTypes],
+          errorMessage: TWEETS_MESSAGES.VALIDATION.INVALID_TYPE
+        }
+      },
+      limit: {
+        isNumeric: true,
+        errorMessage: TWEETS_MESSAGES.VALIDATION.LIMIT_MUST_BE_A_NUMBER,
+        custom: {
+          options: (value, { req }) => {
+            const num = Number(value);
+            if (num < 1 || num > 100) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.BAD_REQUEST,
+                message: TWEETS_MESSAGES.VALIDATION.LIMIT_NOT_VALID
+              });
+            }
+            return true;
+          }
+        }
+      },
+      page: {
+        isNumeric: true,
+        errorMessage: TWEETS_MESSAGES.VALIDATION.PAGE_MUST_BE_A_NUMBER,
+        custom: {
+          options: (value, { req }) => {
+            const num = Number(value);
+            if (num < 1) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.BAD_REQUEST,
+                message: TWEETS_MESSAGES.VALIDATION.PAGE_NOT_VALID
+              });
+            }
+            return true;
+          }
+        }
+      }
+    },
+    ['query']
+  )
+);
