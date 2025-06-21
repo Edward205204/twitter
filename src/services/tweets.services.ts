@@ -72,12 +72,14 @@ class TweetsService {
     tweet_id,
     tweet_type,
     tweet_limit,
-    tweet_page
+    tweet_page,
+    user_id
   }: {
     tweet_id: string;
     tweet_type: TweetType;
     tweet_limit: number;
     tweet_page: number;
+    user_id?: string;
   }) {
     const tweets = await databaseService.tweets
       .aggregate([
@@ -172,9 +174,6 @@ class TweetsService {
                   }
                 }
               }
-            },
-            views: {
-              $add: ['$user_views', '$guest_views']
             }
           }
         },
@@ -191,9 +190,23 @@ class TweetsService {
         }
       ])
       .toArray();
+
     const total = await databaseService.tweets.countDocuments({
       type: tweet_type,
       parent_id: new ObjectId(tweet_id)
+    });
+    const ids = tweets.map((tweet) => tweet._id);
+    const date = new Date();
+    const inc = user_id ? { user_views: 1 } : { guest_views: 1 };
+    await databaseService.tweets.updateMany({ _id: { $in: ids } }, { $inc: inc, $set: { updated_at: date } });
+
+    tweets.forEach((tweet) => {
+      tweet.updated_at = date;
+      if (user_id) {
+        tweet.user_views = tweet.user_views + 1;
+      } else {
+        tweet.guest_views = tweet.guest_views + 1;
+      }
     });
     return {
       tweets,
