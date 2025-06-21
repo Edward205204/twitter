@@ -56,13 +56,15 @@ class TweetsService {
         returnDocument: 'after',
         projection: {
           guest_views: 1,
-          user_views: 1
+          user_views: 1,
+          updated_at: 1
         }
       }
     );
     return tweet as WithId<{
       guest_views: number;
       user_views: number;
+      updated_at: Date;
     }>;
   }
 
@@ -77,7 +79,7 @@ class TweetsService {
     tweet_limit: number;
     tweet_page: number;
   }) {
-    const tweet = await databaseService.tweets
+    const tweets = await databaseService.tweets
       .aggregate([
         {
           $match: {
@@ -189,8 +191,14 @@ class TweetsService {
         }
       ])
       .toArray();
-
-    return tweet;
+    const total = await databaseService.tweets.countDocuments({
+      type: tweet_type,
+      parent_id: new ObjectId(tweet_id)
+    });
+    return {
+      tweets,
+      total
+    };
   }
 }
 

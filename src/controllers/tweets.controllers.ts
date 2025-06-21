@@ -4,7 +4,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { TweetType } from '~/constants/enums';
 import { TWEETS_MESSAGES } from '~/constants/tweet.message';
 import { TweetRequestBody } from '~/models/schemas/requests/Tweet.request';
-import Tweet from '~/models/schemas/Tweets.schema';
+
 import tweetsService from '~/services/tweets.services';
 
 export const createTweetController = async (req: Request<ParamsDictionary, any, TweetRequestBody>, res: Response) => {
@@ -25,7 +25,12 @@ export const getTweetController = async (req: Request, res: Response) => {
   const { tweet_id } = req.params;
   const user_id = req.decoded_authorization?.user_id;
   const result = await tweetsService.increaseView(tweet_id, user_id);
-  const tweet = { ...req.tweet, guest_views: result.guest_views, user_views: result.user_views };
+  const tweet = {
+    ...req.tweet,
+    guest_views: result.guest_views,
+    user_views: result.user_views,
+    updated_at: result.updated_at
+  };
 
   res.json({
     message: TWEETS_MESSAGES.SUCCESS.GET_TWEET_SUCCESS,
@@ -40,7 +45,7 @@ export const getTweetChildrenController = async (req: Request, res: Response) =>
   const tweet_limit = Number(req.query.limit) || 10;
   const tweet_page = Number(req.query.page) || 1;
 
-  const result = await tweetsService.getTweetChildren({
+  const { tweets, total } = await tweetsService.getTweetChildren({
     tweet_id,
     tweet_type,
     tweet_limit,
@@ -49,7 +54,13 @@ export const getTweetChildrenController = async (req: Request, res: Response) =>
 
   res.json({
     message: TWEETS_MESSAGES.SUCCESS.GET_TWEET_CHILDREN_SUCCESS,
-    data: result
+    data: {
+      tweets,
+      tweet_type,
+      limit: tweet_limit,
+      page: tweet_page,
+      total_page: Math.ceil(total / tweet_limit)
+    }
   });
   return;
 };
