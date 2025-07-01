@@ -3,6 +3,7 @@ import { accessTokenValidator, isUserLoggedInValidator, verifyStatusAccount } fr
 import { wrapRequestHandler } from '~/utils/handlers';
 import {
   createTweetController,
+  getNewFeedsController,
   getTweetChildrenController,
   getTweetController
 } from '~/controllers/tweets.controllers';
@@ -10,6 +11,7 @@ import {
   audienceValidator,
   createTweetValidator,
   getTweetChildrenValidator,
+  paginationValidator,
   tweetIdValidator
 } from '~/middlewares/tweets.middlewares';
 const tweetsRouter = Router();
@@ -37,8 +39,17 @@ tweetsRouter.get(
   isUserLoggedInValidator(verifyStatusAccount),
   tweetIdValidator,
   audienceValidator,
+  paginationValidator,
   getTweetChildrenValidator,
   wrapRequestHandler(getTweetChildrenController)
+);
+
+tweetsRouter.get(
+  '/',
+  accessTokenValidator,
+  verifyStatusAccount,
+  paginationValidator,
+  wrapRequestHandler(getNewFeedsController)
 );
 
 export default tweetsRouter;

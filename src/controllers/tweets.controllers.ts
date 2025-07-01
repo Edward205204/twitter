@@ -66,3 +66,21 @@ export const getTweetChildrenController = async (req: Request<TweetParam, any, a
   });
   return;
 };
+
+export const getNewFeedsController = async (req: Request<ParamsDictionary, any, any, TweetQuery>, res: Response) => {
+  const user_id = req.decoded_authorization?.user_id as string; // vì bắt buộc đăng nhập nên luôn có user_id
+  const limit = Number(req.query.limit) || 10;
+  const page = Number(req.query.page) || 1;
+
+  const data = await tweetsService.getNewFeeds({
+    user_id,
+    limit,
+    page
+  });
+
+  res.json({
+    message: TWEETS_MESSAGES.SUCCESS.GET_NEW_FEEDS_SUCCESS,
+    data
+  });
+  return;
+};

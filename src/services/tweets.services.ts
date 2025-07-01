@@ -213,6 +213,24 @@ class TweetsService {
       total
     };
   }
+
+  async getNewFeeds({ user_id, limit, page }: { user_id: string; limit: number; page: number }) {
+    const followed_user_ids = await databaseService.follows
+      .find(
+        { user_id: new ObjectId(user_id) },
+        {
+          projection: {
+            followed_user_id: 1
+          }
+        }
+      )
+      .toArray();
+
+    const ids: ObjectId[] = followed_user_ids.map((user) => user.followed_user_id);
+    ids.push(new ObjectId(user_id));
+    //ids là danh sách id mà mình follow và cũng là id của chính mình
+    return ids;
+  }
 }
 
 const tweetsService = new TweetsService();
