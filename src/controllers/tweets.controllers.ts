@@ -6,6 +6,7 @@ import { TWEETS_MESSAGES } from '~/constants/tweet.message';
 import { TweetParam, TweetQuery, TweetRequestBody } from '~/models/schemas/requests/Tweet.request';
 
 import tweetsService from '~/services/tweets.services';
+import { changePasswordController } from './users.controllers';
 
 export const createTweetController = async (req: Request<ParamsDictionary, any, TweetRequestBody>, res: Response) => {
   const body = req.body as TweetRequestBody;
@@ -72,7 +73,7 @@ export const getNewFeedsController = async (req: Request<ParamsDictionary, any, 
   const limit = Number(req.query.limit) || 10;
   const page = Number(req.query.page) || 1;
 
-  const data = await tweetsService.getNewFeeds({
+  const { tweets, total } = await tweetsService.getNewFeeds({
     user_id,
     limit,
     page
@@ -80,7 +81,12 @@ export const getNewFeedsController = async (req: Request<ParamsDictionary, any, 
 
   res.json({
     message: TWEETS_MESSAGES.SUCCESS.GET_NEW_FEEDS_SUCCESS,
-    data
+    data: {
+      tweets,
+      limit,
+      page,
+      total_page: Math.ceil(total / limit)
+    }
   });
   return;
 };
