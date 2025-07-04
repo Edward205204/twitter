@@ -56,6 +56,12 @@ class Databases {
     this.follows.createIndex({ user_id: 1, followed_user_id: 1 }, { unique: true });
   }
 
+  async indexTweets() {
+    const isExist = await this.tweets.indexExists(['content_text']);
+    if (isExist) return;
+    this.tweets.createIndex({ content: 'text' }, { default_language: 'none' });
+  }
+
   async indexVideoEncodes() {
     const isExist = await this.video_encodes.indexExists(['video_id_1']);
 
