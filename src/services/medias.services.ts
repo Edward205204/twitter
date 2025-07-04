@@ -94,6 +94,7 @@ const queue = new Queue();
 
 class MediasServices {
   async uploadImage(req: Request, res: Response, next: NextFunction) {
+    const start = Date.now();
     const files = await handleUploadImage(req, res, next);
     const data: Media[] = await Promise.all(
       files.map(async (file) => {
@@ -109,6 +110,7 @@ class MediasServices {
         };
       })
     );
+    console.log(`Processed in ${Date.now() - start}ms`);
     return data;
   }
 
@@ -138,8 +140,8 @@ class MediasServices {
         const newFilename = getNameIgnoreExtension(file.newFilename);
         return {
           url: isDevelopment()
-            ? `http://localhost:${process.env.PORT}/static/video-hls/${newFilename}`
-            : `${process.env.HOST}/static/video-hls/${newFilename}`,
+            ? `http://localhost:${process.env.PORT}/static/video-hls/${newFilename}/master.m3u8`
+            : `${process.env.HOST}/static/video-hls/${newFilename}/master.m3u8`,
           type: MediaType.HLS
         };
       })

@@ -15,6 +15,7 @@ export const createTweetController = async (req: Request<ParamsDictionary, any, 
     body,
     user_id
   });
+  console.log(body);
   res.json({
     message: TWEETS_MESSAGES.SUCCESS.CREATE_TWEET_SUCCESS,
     data

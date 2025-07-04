@@ -33,7 +33,7 @@ class TweetsService {
         audience: body.audience,
         type: body.type,
         hashtags: hashtags,
-        medias: [],
+        medias: [...body.medias],
         content: body.content
       })
     );
@@ -467,7 +467,7 @@ class TweetsService {
     });
     return {
       tweets,
-      total: total[0].total
+      total: total[0]?.total || 0
     };
   }
 }
