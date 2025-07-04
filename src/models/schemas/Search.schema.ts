@@ -5,4 +5,5 @@ import { MediaTypeQuery } from '~/constants/enums';
 export interface SearchQuery extends PaginationQuery, Query {
   content: string;
   media_type: MediaTypeQuery;
+  people_follow: string;
 }

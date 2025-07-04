@@ -8,13 +8,15 @@ class SearchService {
     limit,
     page,
     user_id,
-    media_type
+    media_type,
+    people_follow
   }: {
     content: string;
     limit: number;
     page: number;
     user_id: string;
     media_type: MediaTypeQuery;
+    people_follow: string;
   }) {
     const $match: any = {
       $text: {
@@ -33,6 +35,27 @@ class SearchService {
           $in: [MediaType.Video, MediaType.HLS]
         };
       }
+    }
+
+    if (people_follow && people_follow === '1') {
+      const user_ids = await databaseService.follows
+        .find(
+          {
+            user_id: new ObjectId(user_id)
+          },
+          {
+            projection: {
+              _id: 0,
+              user_id: 0,
+              created_at: 0
+            }
+          }
+        )
+        .toArray();
+      const ids = user_ids.map((item) => item.followed_user_id);
+      $match['user_id'] = {
+        $in: ids
+      };
     }
 
     const [tweets, total] = await Promise.all([

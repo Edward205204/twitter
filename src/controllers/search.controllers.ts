@@ -11,7 +11,8 @@ export const searchController = async (req: Request<ParamsDictionary, any, any, 
   const content = req.query.content;
   const user_id = req.decoded_authorization?.user_id as string;
   const media_type = req.query.media_type as MediaTypeQuery;
-  const { tweets, total } = await searchService.search({ content, limit, page, user_id, media_type });
+  const people_follow = req.query.people_follow;
+  const { tweets, total } = await searchService.search({ content, limit, page, user_id, media_type, people_follow });
 
   res.json({
     message: TWEETS_MESSAGES.SUCCESS.SEARCH_SUCCESS,
