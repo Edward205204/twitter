@@ -53,3 +53,4 @@ databaseService
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+// Dùng socket.io để tạo realtime chat
