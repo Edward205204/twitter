@@ -13,12 +13,30 @@ import tweetsRouter from './routes/tweets.routes';
 import bookmarksRouter from './routes/bookmarks.routes';
 import likesRouter from './routes/likes.routes';
 import searchRouter from './routes/search.routes';
+
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+
 // import './utils/fake';
 
 config();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 4000;
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:3000'
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log(`user ${socket.id} connected`);
+  socket.on('disconnect', () => {
+    console.log(`user ${socket.id} disconnected`);
+  });
+});
 
 initFolder();
 app.use(cors());
@@ -50,7 +68,7 @@ databaseService
   })
   .catch(console.dir);
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 // Dùng socket.io để tạo realtime chat
