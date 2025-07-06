@@ -36,6 +36,12 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`user ${socket.id} disconnected`);
   });
+
+  socket.on('join-room', (arg) => {
+    console.log(arg);
+  });
+
+  socket.emit('welcome', 'Hello ' + socket.id + ' from server');
 });
 
 initFolder();
