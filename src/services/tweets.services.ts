@@ -38,8 +38,8 @@ class TweetsService {
       })
     );
 
-    const result = await databaseService.tweets.findOne({ _id: res.insertedId });
-    return result;
+    const data = await databaseService.tweets.findOne({ _id: res.insertedId });
+    return data;
   }
 
   async increaseView(tweet_id: string, user_id?: string) {

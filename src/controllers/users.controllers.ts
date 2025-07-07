@@ -24,32 +24,32 @@ export const loginController = async (req: Request, res: Response, next: NextFun
   const user = req.user as User;
   const verify = user.verify as UserVerifyStatus;
   const user_id = user._id as ObjectId;
-  const result = await usersService.login({ user_id, verify });
-  if (!result) {
+  const data = await usersService.login({ user_id, verify });
+  if (!data) {
     return next({ message: USER_MESSAGE.VALIDATION.CONFIRM_PASSWORD_IS_REQUIRED });
   }
-  res.json({ message: USER_MESSAGE.AUTH.LOGIN_SUCCESS, data: result });
+  res.json({ message: USER_MESSAGE.AUTH.LOGIN_SUCCESS, data });
   return;
 };
 
 export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query;
-  const result = await usersService.oauth(code as string);
-  const redirectUrl = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&is_new_user=${result.is_new_user}`;
+  const data = await usersService.oauth(code as string);
+  const redirectUrl = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${data.access_token}&refresh_token=${data.refresh_token}&is_new_user=${data.is_new_user}`;
   res.redirect(redirectUrl);
   return;
 };
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterRequest>, res: Response) => {
-  const result = await usersService.register(req.body);
-  res.json({ message: USER_MESSAGE.AUTH.REGISTER_SUCCESS, data: result });
+  const data = await usersService.register(req.body);
+  res.json({ message: USER_MESSAGE.AUTH.REGISTER_SUCCESS, data });
   return;
 };
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.body;
-  const result = await usersService.logout(refresh_token);
-  res.json(result);
+  const data = await usersService.logout(refresh_token);
+  res.json(data);
   return;
 };
 
@@ -60,11 +60,11 @@ export const refreshTokenController = async (
   const { refresh_token } = req.body;
   const { user_id, verify, exp } = req.decoded_refresh_token as TokenPayload;
 
-  const result = await usersService.refreshTokenHandling({ refresh_token, user_id, verify, exp });
+  const data = await usersService.refreshTokenHandling({ refresh_token, user_id, verify, exp });
 
   res.json({
     message: USER_MESSAGE.AUTH.REFRESH_TOKEN_SUCCESS,
-    data: result
+    data
   });
   return;
 };
@@ -88,10 +88,10 @@ export const verifyEmailTokenController = async (req: Request<ParamsDictionary, 
     return;
   }
 
-  const result = await usersService.verifyEmail(user_id);
+  const data = await usersService.verifyEmail(user_id);
   res.json({
     message: USER_MESSAGE.AUTH.VERIFY_EMAIL_SUCCESS,
-    result
+    data
   });
   return;
 };
@@ -112,16 +112,16 @@ export const resendVerifyEmailController = async (req: Request, res: Response) =
     return;
   }
 
-  const result = await usersService.resendVerifyEmail(user_id);
-  res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGE.TOKEN.EMAIL_VERIFY_TOKEN_IS_RESENT, result });
+  const data = await usersService.resendVerifyEmail(user_id);
+  res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGE.TOKEN.EMAIL_VERIFY_TOKEN_IS_RESENT, data });
   return;
 };
 
 export const forgotPasswordController = async (req: Request, res: Response) => {
   const { _id } = req.user as User;
   const verify = (req.user as User).verify as UserVerifyStatus;
-  const result = await usersService.forgotPassword({ user_id: (_id as ObjectId).toString(), verify });
-  res.json(result);
+  const data = await usersService.forgotPassword({ user_id: (_id as ObjectId).toString(), verify });
+  res.json(data);
   return;
 };
 
@@ -136,15 +136,15 @@ export const resetPasswordController = async (
 ) => {
   const { _id, salt } = req.user as User;
   const { password } = req.body;
-  const result = await usersService.resetPassword(_id as ObjectId, salt, password);
-  res.json(result);
+  const data = await usersService.resetPassword(_id as ObjectId, salt, password);
+  res.json(data);
   return;
 };
 
 export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
-  const result = await usersService.getMe(user_id);
-  res.json(result);
+  const data = await usersService.getMe(user_id);
+  res.json(data);
   return;
 };
 
@@ -154,31 +154,31 @@ export const updateAccountController = async (
 ) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { body } = req;
-  const result = await usersService.updateAccount(user_id, body);
-  res.json(result);
+  const data = await usersService.updateAccount(user_id, body);
+  res.json(data);
   return;
 };
 
 export const getProfileController = async (req: Request<GetProfileReqParams>, res: Response) => {
   const { username } = req.params;
-  const result = await usersService.getProfile(username);
-  res.json(result);
+  const data = await usersService.getProfile(username);
+  res.json(data);
   return;
 };
 
 export const followController = async (req: Request<ParamsDictionary, any, FollowReqBody>, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { followed_user_id } = req.body;
-  const result = await usersService.follow(user_id, followed_user_id);
-  res.json(result);
+  const data = await usersService.follow(user_id, followed_user_id);
+  res.json(data);
   return;
 };
 
 export const unfollowController = async (req: Request<UnfollowReqParams>, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { followed_user_id } = req.params;
-  const result = await usersService.unfollow(user_id, followed_user_id);
-  res.json(result);
+  const data = await usersService.unfollow(user_id, followed_user_id);
+  res.json(data);
   return;
 };
 
@@ -188,7 +188,7 @@ export const changePasswordController = async (
 ) => {
   const user = req.user as User;
   const { current_password, password } = req.body;
-  const result = await usersService.changePassword(user, password, current_password);
-  res.json(result);
+  const data = await usersService.changePassword(user, password, current_password);
+  res.json(data);
   return;
 };

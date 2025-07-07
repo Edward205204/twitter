@@ -379,7 +379,7 @@ class users {
     }
     return {
       message: USER_MESSAGE.AUTH.GET_ME_SUCCESS,
-      result: user
+      data: user
     };
   }
 
@@ -410,7 +410,7 @@ class users {
     );
     return {
       message: USER_MESSAGE.AUTH.UPDATE_ACCOUNT_SUCCESS,
-      result: user
+      data: user
     };
   }
 
@@ -436,7 +436,7 @@ class users {
     }
     return {
       message: USER_MESSAGE.AUTH.GET_PROFILE_SUCCESS,
-      result: user
+      data: user
     };
   }
 
