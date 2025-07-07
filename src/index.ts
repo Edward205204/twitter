@@ -31,17 +31,28 @@ const io = new Server(httpServer, {
   }
 });
 
+const users: { [key: string]: { socket_id: string } } = {};
+
 io.on('connection', (socket) => {
-  console.log(`user ${socket.id} connected`);
+  // console.log(`user ${socket.id} connected`);
+  const userId = socket.handshake.auth._id;
+  users[userId] = {
+    socket_id: socket.id
+  };
+  console.log(users);
+  socket.on('private message', (data) => {
+    const socket_id_receiver = users[data.to]?.socket_id;
+    if (socket_id_receiver) {
+      socket.to(socket_id_receiver).emit('private message received', {
+        message: data.message,
+        from: userId
+      });
+    }
+  });
   socket.on('disconnect', () => {
+    delete users[userId];
     console.log(`user ${socket.id} disconnected`);
   });
-
-  socket.on('join-room', (arg) => {
-    console.log(arg);
-  });
-
-  socket.emit('welcome', 'Hello ' + socket.id + ' from server');
 });
 
 initFolder();
