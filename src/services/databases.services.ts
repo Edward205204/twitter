@@ -10,6 +10,7 @@ import Tweet from '~/models/schemas/Tweets.schema';
 import HashTag from '~/models/schemas/HashTags.schema';
 import Bookmark from '~/models/schemas/Bookmark.schema';
 import Like from '~/models/schemas/Like.schema';
+import Conversation from '~/models/schemas/Conversation.schema';
 dotenv.config();
 
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xbg5c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -118,6 +119,10 @@ class Databases {
 
   get likes(): Collection<Like> {
     return this.db.collection(process.env.DB_LIKE_COLLECTION as string);
+  }
+
+  get conversations(): Collection<Conversation> {
+    return this.db.collection(process.env.DB_CONVERSATION_COLLECTION as string);
   }
 }
 

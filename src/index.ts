@@ -16,6 +16,7 @@ import searchRouter from './routes/search.routes';
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { ObjectId } from 'mongodb';
 
 // import './utils/fake';
 
@@ -40,14 +41,19 @@ io.on('connection', (socket) => {
     socket_id: socket.id
   };
   console.log(users);
-  socket.on('private message', (data) => {
+  socket.on('private message', async (data) => {
     const socket_id_receiver = users[data.to]?.socket_id;
-    if (socket_id_receiver) {
-      socket.to(socket_id_receiver).emit('private message received', {
-        message: data.message,
-        from: userId
-      });
-    }
+    if (!socket_id_receiver) return;
+    const conversation = await databaseService.conversations.insertOne({
+      sender_id: new ObjectId(userId as string),
+      receiver_id: new ObjectId(data.to as string),
+      content: data.message
+    });
+
+    socket.to(socket_id_receiver).emit('private message received', {
+      message: data.message,
+      from: userId
+    });
   });
   socket.on('disconnect', () => {
     delete users[userId];
