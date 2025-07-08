@@ -13,6 +13,7 @@ import tweetsRouter from './routes/tweets.routes';
 import bookmarksRouter from './routes/bookmarks.routes';
 import likesRouter from './routes/likes.routes';
 import searchRouter from './routes/search.routes';
+import conversationsRouter from './routes/conversations.routes';
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -71,6 +72,7 @@ app.use('/static', staticRouter);
 app.use('/bookmarks', bookmarksRouter);
 app.use('/likes', likesRouter);
 app.use('/search', searchRouter);
+app.use('/conversations', conversationsRouter);
 app.use('/static/videos', express.static(UPLOAD_VIDEOS_DIR));
 
 /**
