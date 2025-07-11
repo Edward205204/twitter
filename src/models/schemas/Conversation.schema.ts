@@ -14,8 +14,8 @@ export default class Conversation {
   sender_id: ObjectId;
   receiver_id: ObjectId;
   content: string;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at: Date;
+  updated_at: Date;
 
   constructor(conversation: ConversationType) {
     const date = new Date();

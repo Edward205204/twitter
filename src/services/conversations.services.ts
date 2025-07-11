@@ -23,13 +23,16 @@ class ConversationsService {
         receiver_id: new ObjectId(user_id)
       }
     ];
+
     const data = await databaseService.conversations
       .find({
         $or: match
       })
+      .sort({ created_at: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .toArray();
+
     const total = await databaseService.conversations.countDocuments({
       $or: match
     });

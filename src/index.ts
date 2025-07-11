@@ -18,6 +18,7 @@ import conversationsRouter from './routes/conversations.routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { ObjectId } from 'mongodb';
+import Conversation from './models/schemas/Conversation.schema';
 
 // import './utils/fake';
 
@@ -36,24 +37,25 @@ const io = new Server(httpServer, {
 const users: { [key: string]: { socket_id: string } } = {};
 
 io.on('connection', (socket) => {
-  // console.log(`user ${socket.id} connected`);
   const userId = socket.handshake.auth._id;
   users[userId] = {
     socket_id: socket.id
   };
-  console.log(users);
-  socket.on('private message', async (data) => {
-    const socket_id_receiver = users[data.to]?.socket_id;
+
+  socket.on('send_message', async (data) => {
+    const socket_id_receiver = users[data.receiver_id]?.socket_id;
     if (!socket_id_receiver) return;
-    const conversation = await databaseService.conversations.insertOne({
+
+    const { receiver_id, content } = data;
+    const conversation = new Conversation({
       sender_id: new ObjectId(userId as string),
-      receiver_id: new ObjectId(data.to as string),
-      content: data.message
+      receiver_id: new ObjectId(receiver_id as string),
+      content
     });
 
-    socket.to(socket_id_receiver).emit('private message received', {
-      message: data.message,
-      from: userId
+    await databaseService.conversations.insertOne(conversation);
+    socket.to(socket_id_receiver).emit('receive_message', {
+      conversation
     });
   });
   socket.on('disconnect', () => {
