@@ -14,7 +14,7 @@ import User from '~/models/schemas/User.schema';
 import { UserVerifyStatus } from '~/constants/enums';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { TokenPayload } from '~/models/schemas/requests/User.request';
-import { USER_NAME_REGEX } from '~/constants/regex';
+import { accessTokenDecode, USER_NAME_REGEX } from '~/constants/regex';
 
 const passwordSchema: ParamSchema = {
   notEmpty: {
@@ -236,11 +236,7 @@ export const accessTokenValidator = validate(
             }
             value = value.split(' ')[1];
             try {
-              const decoded_authorization = await verifyToken({
-                token: value,
-                secretOrPublicKey: process.env.JWT_SECRET_KEY_ACCESS_TOKEN as string
-              });
-              (req as Request).decoded_authorization = decoded_authorization;
+              await accessTokenDecode(value, req as Request);
             } catch (error) {
               throw new ErrorWithStatus({
                 message: capitalize((error as JsonWebTokenError).message),
